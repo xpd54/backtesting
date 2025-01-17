@@ -6,3 +6,5 @@ file(GLOB data_generator_SRC
         "src/util/*.cpp"
 )
 add_executable(data_generator ${data_generator_SRC})
+add_subdirectory(external/common_util)
+target_link_libraries(${PROJECT_NAME} PRIVATE common_util)
