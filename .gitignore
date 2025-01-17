@@ -36,6 +36,8 @@
 #ignoring folders
 build/
 .vscode/
+.cache/
+input/
 
 #ingoring .DS_Store file which contains file structure, Icon position on mac system
 .DS_Store
