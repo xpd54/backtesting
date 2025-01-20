@@ -1,6 +1,7 @@
 #include "price_history.hpp"
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <queue>
 
 namespace back_trader {
@@ -73,8 +74,61 @@ std::vector<HistoryGap> get_price_history_gap(PriceHistory::const_iterator begin
 
 PriceHistory remove_outliers(PriceHistory::const_iterator begin, PriceHistory::const_iterator end,
                              float max_price_deviation_per_min, std::vector<size_t> *outlier_indices) {
+    // TODO :- check for null outlier_indices and return stop with error
     static constexpr int MAX_LOOKAHEAD = 10;
     static constexpr int MIN_LOOKAHEAD_PERSISTENT = 3;
+    PriceHistory price_history_result;
+    for (auto it = begin; it != end; ++it) {
+        const PriceRecord &price_record = *it;
+        const size_t price_record_index = std::distance(begin, it);
+        // if price is less than or equal to 0 or volume was zero consider that as outlier and remove it from dataset
+        if (price_record.price <= 0 || price_record.volume <= 0) {
+            outlier_indices->push_back(price_record_index);
+            continue;
+        }
+
+        // if price record is not outlier push that to result and look ahead for max_price_deviation
+        if (price_history_result.empty()) {
+            price_history_result.push_back(price_record);
+            continue;
+        }
+
+        /*Try to detect if price jump happen that's natural or outlier. we look head in data set (coming more price TPV)
+         * if this jump is valid with defined price deviation permin */
+        const PriceRecord &price_record_prev = price_history_result.back();
+        const float reference_price = price_record_prev.price;
+        const float duration_min =
+            std::max(1.0f, static_cast<float>(price_record.timestamp_sec - price_record_prev.timestamp_sec) / 60.0f);
+        const float jump_factor = (1.0f + max_price_deviation_per_min) * std::sqrt(duration_min);
+        const float jump_up_price = reference_price * jump_factor;
+        const float jump_down_price = reference_price / jump_factor;
+        const bool jumped_up = price_record.price > jump_up_price;
+        const bool jumped_down = price_record.price < jump_down_price;
+        bool is_outlier = false;
+        if (jumped_up || jumped_down) {
+            // look ahead in data if price jump persist
+            int lookahead = 0;
+            int lookahead_persistent = 0;
+            const float middle_up_price = 0.8f * jump_up_price + 0.2f * reference_price;
+            const float middle_down_price = 0.8f * jump_down_price + 0.2f * reference_price;
+            for (auto jt = it + 1; jt != end && lookahead < MAX_LOOKAHEAD; ++jt) {
+                if (jt->price <= 0 || jt->volume < 0) {
+                    continue;
+                }
+                if ((jumped_up && jt->price > middle_up_price) || (jumped_down && jt->price < middle_down_price)) {
+                    ++lookahead_persistent;
+                }
+                ++lookahead;
+            }
+            is_outlier = lookahead_persistent < MIN_LOOKAHEAD_PERSISTENT;
+        }
+        if (!is_outlier) {
+            price_history_result.push_back(price_record);
+        } else if (outlier_indices != nullptr) {
+            outlier_indices->push_back(price_record_index);
+        }
+    }
+    return price_history_result;
 }
 
 } // namespace back_trader
