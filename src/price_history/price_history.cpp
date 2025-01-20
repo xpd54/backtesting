@@ -47,13 +47,12 @@ std::vector<HistoryGap> get_price_history_gap(PriceHistory::const_iterator begin
         queue.push(HistoryGap{start_timestamp_sec, begin->timestamp_sec});
     }
 
-    auto it_previous = end;
-    for (auto it = begin; it != end; ++it) {
-        if (it_previous != end) {
-            queue.push({it_previous->timestamp_sec, it->timestamp_sec});
-            if (queue.size() > top_n)
-                queue.pop();
-        }
+    auto it_previous = begin;
+    for (auto it = begin + 1; it != end; ++it) {
+        queue.push({it_previous->timestamp_sec, it->timestamp_sec});
+        if (queue.size() > top_n)
+            queue.pop();
+
         it_previous = it;
     }
 
@@ -70,6 +69,12 @@ std::vector<HistoryGap> get_price_history_gap(PriceHistory::const_iterator begin
         queue.pop();
     }
     return std::vector<HistoryGap>(history_gaps_result.rbegin(), history_gaps_result.rend());
+}
+
+PriceHistory remove_outliers(PriceHistory::const_iterator begin, PriceHistory::const_iterator end,
+                             float max_price_deviation_per_min, std::vector<size_t> *outlier_indices) {
+    static constexpr int MAX_LOOKAHEAD = 10;
+    static constexpr int MIN_LOOKAHEAD_PERSISTENT = 3;
 }
 
 } // namespace back_trader
