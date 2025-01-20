@@ -131,4 +131,26 @@ PriceHistory remove_outliers(PriceHistory::const_iterator begin, PriceHistory::c
     return price_history_result;
 }
 
+/*In outlier indices also get left and right context of indices. (mark them with false and later print that while
+ * looking ahead in PriceHistory)*/
+std::map<size_t, bool> get_outlier_indices_with_context(const std::vector<size_t> &outlier_indices,
+                                                        size_t price_history_size, size_t left_context_size,
+                                                        size_t right_context_size, size_t last_n) {
+    std::map<size_t, bool> index_to_outlier;
+    const size_t start_i = (last_n == 0 || outlier_indices.size() <= last_n) ? 0 : outlier_indices.size() - last_n;
+    for (size_t i = start_i; i < outlier_indices.size(); ++i) {
+        const size_t j = outlier_indices[i];
+        /*Get left and right context range and mark them false for outliers*/
+        const size_t left = (j <= left_context_size) ? 0 : j - left_context_size;
+        const size_t right = std::min(j + right_context_size + 1, price_history_size);
+        for (size_t k = left; k < right; ++k) {
+            // Keep the existing outliers.
+            index_to_outlier[k] = false;
+        }
+        // Keep the j (original outlier indices)
+        index_to_outlier[j] = true;
+    }
+    return index_to_outlier;
+}
+
 } // namespace back_trader
