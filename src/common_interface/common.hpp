@@ -1,7 +1,8 @@
+#pragma once
 /*Common class, struct, data structure used across data_generator and backtesting trade*/
 
 #include <cstdint>
-namespace backtest {
+namespace back_trader {
 
 /*
 TPV (time, price, volume)
@@ -95,4 +96,4 @@ struct Order {
         float quote_amount;
     };
 };
-} // namespace backtest
+} // namespace back_trader

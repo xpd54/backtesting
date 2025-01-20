@@ -1,8 +1,9 @@
+#pragma once
 #include "../common_interface/common.hpp"
 #include <cstdint>
 #include <utility>
 #include <vector>
-namespace backtest {
+namespace back_trader {
 constexpr int SecondsPerMinute = 60;
 constexpr int SecondsPerHour = 60 * 60;
 constexpr int SecondsPerDay = 24 * 60 * 60;
@@ -50,4 +51,4 @@ std::vector<T> history_subset_copy(const std::vector<T> &history, int64_t start_
     return history_subset_result;
 }
 
-} // namespace backtest
+} // namespace back_trader
