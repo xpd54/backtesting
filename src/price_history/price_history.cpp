@@ -1,5 +1,6 @@
 #include "price_history.hpp"
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <queue>
@@ -151,6 +152,62 @@ std::map<size_t, bool> get_outlier_indices_with_context(const std::vector<size_t
         index_to_outlier[j] = true;
     }
     return index_to_outlier;
+}
+
+OhlcHistory resample(PriceHistory::const_iterator begin, PriceHistory::const_iterator end, int sampling_rate_sec) {
+    OhlcHistory resampled_ohlc_history;
+    for (auto it = begin; it != end; ++it) {
+        /* Find which interval current time stamp belong.
+         ex:- if sampling rate is 5 min or 300sec.
+           1234 =1234 - (1234 % 300) = 1200
+           1250 =1250 - (1250 % 300) = 1200
+           1290 =1290 - (1290 % 300) = 1200
+           1400 =1400 - (1400 % 300) = 1200
+           1580 =1580 - (1580 % 300) = 1500 <= in the next range
+        */
+        const int64_t downsampled_timestamp_sec = it->timestamp_sec - (it->timestamp_sec % sampling_rate_sec);
+
+        /* if new price history comes up but previous history have gap (missing data) fill it with zero volume, with
+         * previous OHLC. Before adding the new price history.*/
+        while (!resampled_ohlc_history.empty() &&
+               resampled_ohlc_history.back().timestamp_sec + sampling_rate_sec < downsampled_timestamp_sec) {
+            const int64_t prev_timestamp_sec = resampled_ohlc_history.back().timestamp_sec;
+            const float prev_close = resampled_ohlc_history.back().close;
+            resampled_ohlc_history.emplace_back();
+            OhlcTick *ohlc_tick = &resampled_ohlc_history.back();
+
+            ohlc_tick->timestamp_sec = prev_timestamp_sec + sampling_rate_sec;
+            ohlc_tick->open = prev_close;
+            ohlc_tick->high = prev_close;
+            ohlc_tick->low = prev_close;
+            ohlc_tick->close = prev_close;
+            ohlc_tick->volume = 0;
+        }
+
+        /*If last ohlc is in previous downsampled time range. Insert new entry, Else update the last entry*/
+        if (resampled_ohlc_history.empty() || resampled_ohlc_history.back().timestamp_sec < downsampled_timestamp_sec) {
+            resampled_ohlc_history.emplace_back();
+            OhlcTick *ohlc_tick = &resampled_ohlc_history.back();
+
+            ohlc_tick->timestamp_sec = downsampled_timestamp_sec;
+            ohlc_tick->open = it->price;
+            ohlc_tick->high = it->price;
+            ohlc_tick->low = it->price;
+            ohlc_tick->close = it->price;
+            ohlc_tick->volume = it->volume;
+        } else {
+            assert(resampled_ohlc_history.back().timestamp_sec == downsampled_timestamp_sec);
+            OhlcTick *ohlc_tick = &resampled_ohlc_history.back();
+
+            /// Hight would be max of price in that range
+            ohlc_tick->high = std::max(ohlc_tick->high, it->price);
+            // low would be min of all price in that range
+            ohlc_tick->low = std::min(ohlc_tick->low, it->price);
+            ohlc_tick->close = it->price;
+            ohlc_tick->volume = ohlc_tick->volume + it->volume;
+        }
+    }
+    return resampled_ohlc_history;
 }
 
 } // namespace back_trader
