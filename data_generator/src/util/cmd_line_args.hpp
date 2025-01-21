@@ -3,14 +3,14 @@
 #include <array>
 #include <string_view>
 
-#define max_price_deviation_per_min 0.05
-#define sampling_rate_sec 300
-#define top_n_gaps 50
-#define last_n_outliers 20
-#define compress_in_byte true
+#define MAX_PRICE_DEVIATION_PER_MIN 0.05
+#define SAMPLING_RATE_SEC 300
+#define TOP_N_GAPS 50
+#define LAST_N_OUTLIERS 20
+#define COMPRESS_IN_BYTE true
 // available data full range
-#define start_time "2017-01-01"
-#define end_time "2021-01-01"
+#define START_TIME "2017-01-01"
+#define END_TIME "2021-01-01"
 #define NONE "NONE"
 constexpr std::array<std::pair<std::string_view, std::string_view>, 15> args{
     {{"input_price_history_csv_file", "input_price_history_csv_file"},
