@@ -1,6 +1,8 @@
+#include "common_util/time_util.hpp"
 #include "util/cmd_line_args.hpp"
 #include <common_util.hpp>
 #include <cstdlib>
+#include <ctime>
 #include <string>
 #include <unordered_map>
 using common_util::Logger;
@@ -37,8 +39,10 @@ int main(int argc, char *argv[]) {
     int last_n_outliers = arg_map["last_n_outliers"] == "" ? LAST_N_OUTLIERS : std::stoi(arg_map["last_n_outliers"]);
     bool compress_in_byte =
         arg_map["compress_in_byte"] == "" ? COMPRESS_IN_BYTE : std::stoi(arg_map["compress_in_byte"]);
-    std::string start_time = arg_map["start_time"];
-    std::string end_time = arg_map["end_time"];
+    std::time_t start_time =
+        arg_map["start_time"] == "" ? convert_time_string(arg_map["start_time"]) : convert_time_string(START_TIME);
+    std::time_t end_time =
+        arg_map["end_time"] == "" ? convert_time_string(arg_map["end_time"]) : convert_time_string(END_TIME);
 
     logger.close();
     return 0;
