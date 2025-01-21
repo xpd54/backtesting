@@ -28,6 +28,7 @@ constexpr std::array<std::pair<std::string_view, std::string_view>, 15> args{
      {"top_n_gaps", "top_n_gaps"},
      {"last_n_outliers", "last_n_outliers"},
      {"compress_in_byte", "compress_in_byte"}}};
+
 constexpr std::string_view get_value(std::string_view key) {
     for (const auto &val : args) {
         if (val.first == key) {
