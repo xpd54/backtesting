@@ -22,8 +22,8 @@ PriceHistory remove_outliers(PriceHistory::const_iterator begin, PriceHistory::c
 
 /* Returns a map from price_history indices to booleans indicating whether the
  indices correspond to outliers or not (taking the last_n outlier_indices).
- Every outlier has left_context_size indices to the left (if possible) and
- right_context_size indices to the right (if possible).
+ Every outlier has left_context_size indices to the left (if possible) (not to be before the index of first TPV) and
+ right_context_size indices to the right (if possible) (not to exceed index of last TPV).
  price_history_size is the size of the original price history. */
 std::map<size_t, bool> get_outlier_indices_with_context(const std::vector<size_t> &outlier_indices,
                                                         size_t price_history_size, size_t left_context_size,
