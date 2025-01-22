@@ -1,18 +1,21 @@
+#include "common_util/Logger.hpp"
 #include "common_util/time_util.hpp"
 #include "util/cmd_line_args.hpp"
 #include <common_util.hpp>
 #include <cstdlib>
 #include <ctime>
+#include <iomanip>
+#include <iostream>
 #include <string>
 #include <unordered_map>
-using common_util::Logger;
+using namespace common_util;
 int main(int argc, char *argv[]) {
     /*Initialize logger*/
-    common_util::Logger &logger = common_util::Logger::get_instance();
-    logger.init();
+    Logger &logger = Logger::get_instance();
+    logger.init("log_file.log", Logger::Severity::DEBUG, Logger::OutputMode::CONSOLE);
     logger.open();
     /*validate arguments*/
-    std::unordered_map<std::string, std::string> arg_map = common_util::get_command_line_argument(argc, argv);
+    std::unordered_map<std::string, std::string> arg_map = get_command_line_argument(argc, argv);
     for (auto &val : arg_map) {
         if (!arg_valid(val.first)) {
             logger.log(val.first + " arg is not valid", Logger::Severity::ERROR);
@@ -40,10 +43,11 @@ int main(int argc, char *argv[]) {
     bool compress_in_byte =
         arg_map["compress_in_byte"] == "" ? COMPRESS_IN_BYTE : std::stoi(arg_map["compress_in_byte"]);
     std::time_t start_time =
-        arg_map["start_time"] == "" ? convert_time_string(arg_map["start_time"]) : convert_time_string(START_TIME);
+        (arg_map["start_time"] == "" ? convert_time_string(START_TIME) : convert_time_string(arg_map["start_time"]));
     std::time_t end_time =
-        arg_map["end_time"] == "" ? convert_time_string(arg_map["end_time"]) : convert_time_string(END_TIME);
-
+        arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
+    logger.log("Selected time period:- " + formate_time_utc(start_time) + " " + formate_time_utc(end_time),
+               Logger::Severity::INFO);
     logger.close();
     return 0;
 }
