@@ -14,13 +14,13 @@
 #define NONE "NONE"
 constexpr std::array<std::pair<std::string_view, std::string_view>, 15> args{
     {{"input_price_history_csv_file", "input_price_history_csv_file"},
-     {"input_price_history_delimited_file", "input_price_history_delimited_file"},
-     {"output_price_history_delimited_file", "output_price_history_delimited_file"},
+     {"input_price_history_binary_file", "input_price_history_binary_file"},
+     {"output_price_history_binary_file", "output_price_history_binary_file"},
      {"input_ohlc_history_csv_file", "input_ohlc_history_csv_file"},
-     {"input_ohlc_history_delimited_file", "input_ohlc_history_delimited_file"},
-     {"output_ohlc_history_delimited_file", "output_ohlc_history_delimited_file"},
+     {"input_ohlc_history_binary_file", "input_ohlc_history_binary_file"},
+     {"output_ohlc_history_binary_file", "output_ohlc_history_binary_file"},
      {"input_side_history_csv_file", "input_side_history_csv_file"},
-     {"output_side_history_delimited_file", "output_side_history_delimited_file"},
+     {"output_side_history_binary_file", "output_side_history_binary_file"},
      {"start_time", "start_time"},
      {"end_time", "end_time"},
      {"max_price_deviation_per_min", "max_price_deviation_per_min"},

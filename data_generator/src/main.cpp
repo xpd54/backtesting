@@ -23,15 +23,15 @@ int main(int argc, char *argv[]) {
         }
     }
     std::string input_price_history_csv_file = arg_map["input_price_history_csv_file"];
-    std::string input_price_history_delimited_file = arg_map["input_price_history_delimited_file"];
-    std::string output_price_history_delimited_file = arg_map["output_price_history_delimited_file"];
+    std::string input_price_history_binary_file = arg_map["input_price_history_binary_file"];
+    std::string output_price_history_binary_file = arg_map["output_price_history_binary_file"];
 
     std::string input_ohlc_history_csv_file = arg_map["input_ohlc_history_csv_file"];
-    std::string input_ohlc_history_delimited_file = arg_map["input_ohlc_history_delimited_file"];
-    std::string output_ohlc_history_delimited_file = arg_map["output_ohlc_history_delimited_file"];
+    std::string input_ohlc_history_binary_file = arg_map["input_ohlc_history_binary_file"];
+    std::string output_ohlc_history_binary_file = arg_map["output_ohlc_history_binary_file"];
 
     std::string input_side_history_csv_file = arg_map["input_side_history_csv_file"];
-    std::string output_side_history_delimited_file = arg_map["output_side_history_delimited_file"];
+    std::string output_side_history_binary_file = arg_map["output_side_history_binary_file"];
 
     double max_price_deviation_per_min = arg_map["max_price_deviation_per_min"] == ""
                                              ? MAX_PRICE_DEVIATION_PER_MIN
@@ -48,6 +48,36 @@ int main(int argc, char *argv[]) {
         arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
     logger.log("Selected time period:- [" + formate_time_utc(start_time) + "] - [" + formate_time_utc(end_time) + "]",
                Logger::Severity::INFO);
+
+    // Error :- Getting two input at same time
+    if (!input_price_history_csv_file.empty() && !input_price_history_binary_file.empty()) {
+        logger.log("Cannot process two input price history files", Logger::Severity::ERROR);
+        std::exit(EXIT_FAILURE);
+    }
+
+    // Error :- Getting two ohlc history files
+    if (!input_ohlc_history_csv_file.empty() && !input_ohlc_history_binary_file.empty()) {
+        logger.log("Cannot process two input OHLC history files", Logger::Severity::ERROR);
+        std::exit(EXIT_FAILURE);
+    }
+
+    const bool read_price_history = !input_price_history_csv_file.empty() || !input_price_history_binary_file.empty();
+    const bool read_ohlc_history = input_ohlc_history_csv_file.empty() || input_ohlc_history_binary_file.empty();
+    const bool read_side_history = !input_side_history_csv_file.empty();
+
+    const int num_history_files =
+        (read_price_history ? 1 : 0) + (read_ohlc_history ? 1 : 0) + (read_side_history ? 1 : 0);
+
+    // we would ignore side_history (fear & greed) for now
+    if (num_history_files > 1) {
+        logger.log("Cannot read more than one input history file", Logger::Severity::ERROR);
+        std::exit(EXIT_FAILURE);
+    }
+
+    if (num_history_files == 0) {
+        logger.log("Input history file not specified", Logger::Severity::ERROR);
+        std::exit(EXIT_FAILURE);
+    }
     logger.close();
     return 0;
 }
