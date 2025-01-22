@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
         (arg_map["start_time"] == "" ? convert_time_string(START_TIME) : convert_time_string(arg_map["start_time"]));
     std::time_t end_time =
         arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
-    logger.log("Selected time period:- " + formate_time_utc(start_time) + " " + formate_time_utc(end_time),
+    logger.log("Selected time period:- [" + formate_time_utc(start_time) + "] - [" + formate_time_utc(end_time) + "]",
                Logger::Severity::INFO);
     logger.close();
     return 0;
