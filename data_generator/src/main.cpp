@@ -1,14 +1,89 @@
+#include "../../src/base/base.hpp"
 #include "common_util/Logger.hpp"
+#include "common_util/memory_map_util.hpp"
 #include "common_util/time_util.hpp"
 #include "util/cmd_line_args.hpp"
 #include <common_util.hpp>
+#include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <ctime>
-#include <iomanip>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
+
 using namespace common_util;
+using namespace back_trader;
+
+namespace back_trader {
+void logInfo(std::string str) { Logger::get_instance().log(str, Logger::Severity::INFO); }
+void logError(std::string str) { Logger::get_instance().log(str, Logger::Severity::ERROR); }
+
+PriceHistory read_price_history_from_csv_file(const std::string &file_name, const std::time_t start_time,
+                                              const std::time_t end_time) {
+    const std::time_t latency_start_time = std::time(nullptr);
+    logInfo("Reading price from csv file: -" + file_name);
+
+    // Memory map the file as string_view
+    common_util::RMemoryMapped<char> read_file(file_name);
+    const char *begin = read_file.begin();
+    size_t view_size = read_file.size();
+    std::string_view input_file_view = std::string_view(begin, view_size);
+
+    // have a lambda to find location of next new line
+    auto new_line_position = [&](uint64_t start_pos) {
+        uint64_t found = input_file_view.find('\n', start_pos);
+        return found;
+    };
+
+    PriceHistory price_history;
+    // Creat TVP object and push it to PriceHistory
+    int64_t time;
+    float price;
+    float volume;
+    uint64_t start = 0;
+    uint64_t found = view_size;
+    while (start < view_size) {
+        std::string_view temp_hold;
+        found = input_file_view.find(',', start);
+        temp_hold = input_file_view.substr(start, found - start);
+        time = std::stoul(temp_hold.data());
+
+        // skip the line if time is not valid with start time
+        if (start_time > 0 && time < start_time) {
+            start = new_line_position(start) + 1;
+            continue;
+        }
+        // have reached to the limit of end time
+        if (end_time > 0 && time >= end_time) {
+            break;
+        }
+        start = found + 1;
+
+        found = input_file_view.find(',', start);
+        temp_hold = input_file_view.substr(start, found - start);
+        start = found + 1;
+        price = std::stof(temp_hold.data());
+
+        found = new_line_position(start);
+        temp_hold = input_file_view.substr(start, found - start);
+        start = found + 1;
+        volume = std::stof(temp_hold.data());
+
+        price_history.push_back({time, price, volume});
+    }
+    const std::time_t latency_end_time = std::time(nullptr);
+    const size_t total_record = price_history.size();
+
+    logInfo("Loaded " + std::to_string(total_record) + " records in " +
+            std::to_string(latency_end_time - latency_start_time) + " sec");
+    return price_history;
+}
+
+PriceHistory read_input_price_history_binary_file();
+} // namespace back_trader
+
 int main(int argc, char *argv[]) {
     /*Initialize logger*/
     Logger &logger = Logger::get_instance();
@@ -78,6 +153,9 @@ int main(int argc, char *argv[]) {
         logger.log("Input history file not specified", Logger::Severity::ERROR);
         std::exit(EXIT_FAILURE);
     }
+    PriceHistory history = read_price_history_from_csv_file(input_price_history_csv_file, start_time, end_time);
+    std::cout << history.size() << '\n';
+    std::cout << history.back().timestamp_sec << ' ' << history.back().price << ' ' << history.back().volume << ' ';
     logger.close();
     return 0;
 }
