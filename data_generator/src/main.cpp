@@ -82,7 +82,26 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
     return price_history;
 }
 
-PriceHistory read_input_price_history_binary_file();
+template <typename T>
+std::vector<T> read_input_price_history_binary_file(const std::string &file_name, const std::time_t start_time,
+                                                    const std::time_t end_time, bool validate_for_time) {
+    const std::time_t latency_start_time = std::time_t(nullptr);
+    logInfo("Reading history from binary file" + file_name);
+    common_util::RMemoryMapped<T> read_file(file_name);
+    const T *begin = read_file.begin();
+    const T *end = read_file.end();
+    std::vector<T> price_history;
+    if (!validate_for_time) {
+        price_history.assign(begin, end);
+    } else {
+        // run time validataion and push value to price history
+    }
+
+    const std::time_t latency_end_time = std::time(nullptr);
+    logInfo("loaded " + std::to_string(price_history.size()) + " records in " +
+            std::to_string((latency_end_time - latency_start_time)));
+    return price_history;
+}
 
 template <typename T>
 bool write_history_to_binary_file(const std::vector<T> &history, const std::string &output_price_history_binary_file) {
@@ -169,8 +188,16 @@ int main(int argc, char *argv[]) {
         logger.log("Input history file not specified", Logger::Severity::ERROR);
         std::exit(EXIT_FAILURE);
     }
-    PriceHistory history = read_price_history_from_csv_file(input_price_history_csv_file, start_time, end_time);
-    write_history_to_binary_file(history, output_price_history_binary_file);
+    PriceHistory history;
+    if (!input_price_history_csv_file.empty())
+        history = read_price_history_from_csv_file(input_price_history_csv_file, start_time, end_time);
+    if (!output_price_history_binary_file.empty())
+        write_history_to_binary_file(history, output_price_history_binary_file);
+
+    if (!input_price_history_binary_file.empty())
+        history = read_input_price_history_binary_file<PriceRecord>(input_price_history_binary_file, start_time,
+                                                                    end_time, false);
+    std::cout << history.size() << " " << history.front().timestamp_sec << '\n';
     logger.close();
     return 0;
 }
