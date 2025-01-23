@@ -29,7 +29,7 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
     common_util::RMemoryMapped<char> read_file(file_name);
     const char *begin = read_file.begin();
     size_t view_size = read_file.size();
-    std::string_view input_file_view = std::string_view(begin, view_size);
+    std::string_view input_file_view = std::string_view(begin);
 
     // have a lambda to find location of next new line
     auto new_line_position = [&](uint64_t start_pos) {
@@ -49,7 +49,6 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
         found = input_file_view.find(',', start);
         temp_hold = input_file_view.substr(start, found - start);
         time = std::stoul(temp_hold.data());
-
         // skip the line if time is not valid with start time
         if (start_time > 0 && time < start_time) {
             start = new_line_position(start) + 1;
@@ -137,7 +136,7 @@ int main(int argc, char *argv[]) {
     }
 
     const bool read_price_history = !input_price_history_csv_file.empty() || !input_price_history_binary_file.empty();
-    const bool read_ohlc_history = input_ohlc_history_csv_file.empty() || input_ohlc_history_binary_file.empty();
+    const bool read_ohlc_history = !input_ohlc_history_csv_file.empty() || !input_ohlc_history_binary_file.empty();
     const bool read_side_history = !input_side_history_csv_file.empty();
 
     const int num_history_files =
@@ -154,8 +153,6 @@ int main(int argc, char *argv[]) {
         std::exit(EXIT_FAILURE);
     }
     PriceHistory history = read_price_history_from_csv_file(input_price_history_csv_file, start_time, end_time);
-    std::cout << history.size() << '\n';
-    std::cout << history.back().timestamp_sec << ' ' << history.back().price << ' ' << history.back().volume << ' ';
     logger.close();
     return 0;
 }

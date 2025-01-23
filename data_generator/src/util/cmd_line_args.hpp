@@ -9,8 +9,8 @@
 #define LAST_N_OUTLIERS 20
 #define COMPRESS_IN_BYTE true
 // available data full range
-#define START_TIME "2017-01-01"
-#define END_TIME "2021-01-01"
+#define START_TIME "2011-09-14"
+#define END_TIME "2024-06-13"
 #define NONE "NONE"
 constexpr std::array<std::pair<std::string_view, std::string_view>, 15> args{
     {{"input_price_history_csv_file", "input_price_history_csv_file"},
