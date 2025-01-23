@@ -3,6 +3,7 @@
 #include "common_util/memory_map_util.hpp"
 #include "common_util/time_util.hpp"
 #include "util/cmd_line_args.hpp"
+#include <algorithm>
 #include <common_util.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -71,7 +72,7 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
         volume = std::stof(temp_hold.data());
         price_history.push_back({time, price, volume});
         if (!(price_history.size() % 1000000))
-            std::cout << "so far " << price_history.size() << time << '\n';
+            std::cout << "so far " << price_history.size() << " " << time << '\n';
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = price_history.size();
@@ -82,6 +83,21 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
 }
 
 PriceHistory read_input_price_history_binary_file();
+
+template <typename T>
+bool write_history_to_binary_file(const std::vector<T> &history, const std::string &output_price_history_binary_file) {
+    const std::time_t latency_start_time = std::time(nullptr);
+    logInfo("Number of records " + std::to_string(history.size()) + "to file " + output_price_history_binary_file);
+    // Memory map the file to output binary file
+    size_t file_size = sizeof(T) * history.size();
+    common_util::WMemoryMapped<T> write_file(output_price_history_binary_file, file_size);
+    T *begin = write_file.begin();
+    std::copy(history.begin(), history.end(), begin);
+    write_file.flush();
+    const std::time_t latency_end_time = std::time(nullptr);
+    logInfo("finished in " + std::to_string(latency_end_time - latency_start_time));
+    return true;
+}
 } // namespace back_trader
 
 int main(int argc, char *argv[]) {
@@ -154,6 +170,7 @@ int main(int argc, char *argv[]) {
         std::exit(EXIT_FAILURE);
     }
     PriceHistory history = read_price_history_from_csv_file(input_price_history_csv_file, start_time, end_time);
+    write_history_to_binary_file(history, output_price_history_binary_file);
     logger.close();
     return 0;
 }
