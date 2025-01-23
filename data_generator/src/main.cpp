@@ -82,8 +82,17 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
 
 PriceHistory read_price_histry_from_binary_file(const std::string &file_name, const std::time_t start_time,
                                                 const std::time_t end_time) {
-    return read_history_from_binary_file<PriceRecord>(file_name, start_time, end_time,
-                                                      [](const PriceRecord &price) { return true; });
+    return read_history_from_binary_file<PriceRecord>(file_name, start_time, end_time, [](const PriceRecord &record) {
+        if (record.price <= 0) {
+            logError("Invalid Price");
+            return false;
+        }
+        if (record.volume < 0) {
+            logError("Invalid volume");
+            return false;
+        }
+        return true;
+    });
 }
 
 } // namespace back_trader
@@ -166,6 +175,7 @@ int main(int argc, char *argv[]) {
     if (!input_price_history_binary_file.empty())
         history = read_price_histry_from_binary_file(input_price_history_binary_file, start_time, end_time);
     std::cout << history.size() << " " << history.front().timestamp_sec << '\n';
+
     logger.close();
     return 0;
 }
