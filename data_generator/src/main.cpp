@@ -29,7 +29,7 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
     common_util::RMemoryMapped<char> read_file(file_name);
     const char *begin = read_file.begin();
     size_t view_size = read_file.size();
-    std::string_view input_file_view = std::string_view(begin);
+    std::string_view input_file_view = std::string_view(begin, view_size);
 
     // have a lambda to find location of next new line
     auto new_line_position = [&](uint64_t start_pos) {
@@ -45,10 +45,10 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
     uint64_t start = 0;
     uint64_t found = view_size;
     while (start < view_size) {
-        std::string_view temp_hold;
+        std::string temp_hold;
         found = input_file_view.find(',', start);
         temp_hold = input_file_view.substr(start, found - start);
-        time = std::stoul(temp_hold.data());
+        time = std::stoul(temp_hold);
         // skip the line if time is not valid with start time
         if (start_time > 0 && time < start_time) {
             start = new_line_position(start) + 1;
@@ -69,8 +69,9 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
         temp_hold = input_file_view.substr(start, found - start);
         start = found + 1;
         volume = std::stof(temp_hold.data());
-
         price_history.push_back({time, price, volume});
+        if (!(price_history.size() % 1000000))
+            std::cout << "so far " << price_history.size() << time << '\n';
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = price_history.size();
