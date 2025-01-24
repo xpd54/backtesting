@@ -95,6 +95,90 @@ PriceHistory read_price_histry_from_binary_file(const std::string &file_name, co
     });
 }
 
+// Read OHLC input file from csv
+OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const std::time_t start_time,
+                                            const std::time_t end_time) {
+    const std::time_t latency_start_time = std::time(nullptr);
+    logInfo("Reading OHLC history from csv file " + file_name);
+    common_util::RMemoryMapped<char> read_file(file_name);
+    const char *begin = read_file.begin();
+    size_t view_size = read_file.size();
+    std::string_view input_file_view = std::string_view(begin, view_size);
+    // have a lambda to find location of next new line
+    auto new_line_pos = [&](uint64_t &start_pos) { return input_file_view.find('\n', start_pos); };
+    auto new_comma_pos = [&](uint64_t &start_pos) { return input_file_view.find(',', start_pos); };
+    auto next_comma_value = [&](uint64_t &start_pos, uint64_t &found_pos) {
+        found_pos = new_comma_pos(start_pos);
+        std::string temp_hold(input_file_view.substr(start_pos, found_pos));
+        start_pos = found_pos + 1;
+        return std::stof(temp_hold);
+    };
+    auto last_comma_value = [&](uint64_t &start_pos, uint64_t &found_pos) {
+        found_pos = new_line_pos(start_pos);
+        std::string temp_hold(input_file_view.substr(start_pos, found_pos));
+        start_pos = found_pos + 1;
+        return std::stof(temp_hold);
+    };
+
+    uint64_t row = 0;
+    int64_t timestamp_sec_prev = 0;
+
+    // ohlc
+    int64_t timestamp_sec = 0;
+    float open = 0;
+    float high = 0;
+    float low = 0;
+    float close = 0;
+    float volume = 0;
+    OhlcHistory ohlc_history;
+
+    uint64_t start = 0;
+    uint64_t found = view_size;
+
+    while (start < view_size) {
+        std::string temp_hold;
+
+        found = new_comma_pos(start);
+        temp_hold = input_file_view.substr(start, found);
+        timestamp_sec = std::stol(temp_hold);
+        // Validate timestamp
+        if (start > 0 && timestamp_sec < start_time) {
+            continue;
+        }
+        if (end_time > 0 && timestamp_sec >= end_time) {
+            break;
+        }
+        if (timestamp_sec <= 0 || timestamp_sec < timestamp_sec_prev) {
+            logError("Invalid timestamp on line " + std::to_string(row));
+            break;
+        }
+        start = found + 1;
+
+        open = next_comma_value(start, found);
+        high = next_comma_value(start, found);
+        low = next_comma_value(start, found);
+        close = next_comma_value(start, found);
+        volume = last_comma_value(start, found);
+
+        if (open <= 0 || high <= 0 || low <= 0 || close <= 0 || low > open || low > high || low > close ||
+            high < open || high < close) {
+            logError("Invalid OHLC prices on line " + std::to_string(row));
+            break;
+        }
+        if (volume < 0) {
+            logError("Invalid volume on the line" + std::to_string(row));
+            break;
+        }
+        timestamp_sec_prev = timestamp_sec;
+        ohlc_history.push_back({timestamp_sec, open, high, low, close, volume});
+    }
+    const std::time_t latency_end_time = std::time(nullptr);
+    const size_t total_record = ohlc_history.size();
+    logInfo("Loaded " + std::to_string(total_record) + " OHLC ticks in " +
+            std::to_string(latency_end_time - latency_start_time) + " sec");
+    return ohlc_history;
+}
+
 } // namespace back_trader
 
 int main(int argc, char *argv[]) {
