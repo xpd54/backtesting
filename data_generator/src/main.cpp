@@ -1,7 +1,9 @@
 #include "../../src/base/base.hpp"
+#include "../../src/price_history/price_history.hpp"
 #include "binary_io/binary_read_write.hpp"
 #include "common_util/Logger.hpp"
 #include "common_util/memory_map_util.hpp"
+#include "common_util/string_format_util.hpp"
 #include "common_util/time_util.hpp"
 #include "util/cmd_line_args.hpp"
 #include "util/quick_log.hpp"
@@ -179,6 +181,35 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
     return ohlc_history;
 }
 
+OhlcHistory read_ohlc_history_from_binary_file(const std::string &file_name, const std::time_t start_time,
+                                               const std::time_t end_time) {
+    return read_history_from_binary_file<OhlcTick>(file_name, start_time, end_time, [](const OhlcTick &ohlc_tick) {
+        if (ohlc_tick.open <= 0 || ohlc_tick.high <= 0 || ohlc_tick.low <= 0 || ohlc_tick.close <= 0 ||
+            ohlc_tick.low > ohlc_tick.open || ohlc_tick.low > ohlc_tick.high || ohlc_tick.low > ohlc_tick.close ||
+            ohlc_tick.high < ohlc_tick.open || ohlc_tick.high < ohlc_tick.close) {
+            logError("Invalid OHLC prices");
+            return false;
+        }
+        if (ohlc_tick.volume < 0) {
+            logError("Invalid volume");
+        }
+        return true;
+    });
+}
+
+// Prints the top_n largest (chronologically sorted) price history gaps.
+void print_price_history_gaps(const PriceHistory &price_history, size_t top_n) {
+    const std::vector<HistoryGap> history_gaps =
+        get_price_history_gap(price_history.begin(), price_history.end(), 0, 0, top_n);
+    for (const HistoryGap &history_gap : history_gaps) {
+        const int64_t gap_duration_sec = history_gap.second - history_gap.first;
+        logInfo(string_format(history_gap.first, " ", '[', formate_time_utc(history_gap.first, "%Y-%m-%d %H:%M:%S"),
+                              ']', history_gap.second, " ", '[',
+                              formate_time_utc(history_gap.second, "%Y-%m-%d %H:%M:%S"),
+                              duration_to_string(gap_duration_sec)));
+    }
+}
+
 } // namespace back_trader
 
 int main(int argc, char *argv[]) {
@@ -250,17 +281,39 @@ int main(int argc, char *argv[]) {
         logger.log("Input history file not specified", Logger::Severity::ERROR);
         std::exit(EXIT_FAILURE);
     }
-    PriceHistory history;
-    if (!input_price_history_csv_file.empty())
-        history = read_price_history_from_csv_file(input_price_history_csv_file, start_time, end_time);
-    if (!output_price_history_binary_file.empty())
-        write_history_to_binary_file(history, output_price_history_binary_file);
 
-    if (!input_price_history_binary_file.empty())
-        history = read_price_histry_from_binary_file(input_price_history_binary_file, start_time, end_time);
-    OhlcHistory ohlc_history;
-    if (!input_ohlc_history_csv_file.empty())
-        ohlc_history = read_ohlc_history_from_csv_file(input_ohlc_history_csv_file, start_time, end_time);
+    // Read PriceRecord(TPV) from csv or binary
+    PriceHistory price_history = [&]() {
+        if (!input_price_history_csv_file.empty()) {
+            return read_price_history_from_csv_file(input_price_history_csv_file, start_time, end_time);
+        } else if (!input_price_history_binary_file.empty()) {
+            return read_price_histry_from_binary_file(input_price_history_binary_file, start_time, end_time);
+        }
+        return PriceHistory{};
+    }();
+
+    // Read OhlcTick(OHLC) from csv or binary
+    OhlcHistory ohlc_history = [&]() {
+        if (!input_ohlc_history_csv_file.empty()) {
+            return read_ohlc_history_from_csv_file(input_ohlc_history_csv_file, start_time, end_time);
+        } else if (!input_ohlc_history_binary_file.empty()) {
+            return read_ohlc_history_from_binary_file(input_ohlc_history_binary_file, start_time, end_time);
+        }
+        return OhlcHistory{};
+    }();
+
+    // Ignore side history for now
+
+    if (!price_history.empty()) {
+        logInfo("Top " + std::to_string(top_n_gaps) + " gaps");
+    }
+
+    if (!price_history.empty() && !output_price_history_binary_file.empty())
+        write_history_to_binary_file(price_history, output_price_history_binary_file);
+
+    if (!ohlc_history.empty() && !output_ohlc_history_binary_file.empty())
+        write_history_to_binary_file(ohlc_history, output_ohlc_history_binary_file);
+
     std::cout << ohlc_history.size() << " " << ohlc_history.front().timestamp_sec << '\n';
     std::cout << ohlc_history.size() << " " << ohlc_history.back().timestamp_sec << '\n';
 
