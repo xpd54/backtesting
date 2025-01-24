@@ -3,9 +3,11 @@
 #include "common_util/memory_map_util.hpp"
 #include "common_util/string_format_util.hpp"
 #include "common_util/time_util.hpp"
+#include "price_history/price_history.hpp"
 #include "util/cmd_line_args.hpp"
 #include "util/quick_log.hpp"
 #include <base_header.hpp>
+#include <cassert>
 #include <common_util.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -204,6 +206,33 @@ void print_price_history_gaps(const PriceHistory &price_history, size_t top_n) {
                               ']', history_gap.second, " ", '[',
                               formate_time_utc(history_gap.second, "%Y-%m-%d %H:%M:%S"),
                               duration_to_string(gap_duration_sec)));
+    }
+}
+
+/* Prints a subset of the given price history that covers the last_n outliers.
+ Every outlier is surrounded by left_context_size of previous prices (if
+ possible) and right_context_size of follow-up prices (if possible). */
+void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistory::const_iterator end,
+                                 const std::vector<size_t> &outlier_indices, size_t left_context_size,
+                                 size_t right_context_size, size_t last_n) {
+    const size_t price_history_size = std::distance(begin, end);
+    std::map<size_t, bool> index_to_outlier = get_outlier_indices_with_context(
+        outlier_indices, price_history_size, left_context_size, right_context_size, last_n);
+
+    size_t index_prev = 0;
+    for (const auto &index_outlier_pair : index_to_outlier) {
+        const size_t index = index_outlier_pair.first;
+        const bool is_outlier = index_outlier_pair.second;
+        assert(index < price_history_size);
+        const PriceRecord &price_record = *(begin + index);
+        if (index_prev > 0 && index > index_prev + 1) {
+            logInfo("   ...");
+        }
+
+        logInfo(string_format((is_outlier ? " x" : "  "), ' ', price_record.timestamp_sec, " [",
+                              formate_time_utc(price_record.timestamp_sec), "]: ", price_record.price, " [",
+                              price_record.volume, ']'));
+        index_prev = index;
     }
 }
 
