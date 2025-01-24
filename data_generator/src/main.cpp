@@ -13,7 +13,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <ctime>
-#include <iostream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -25,7 +24,7 @@ namespace back_trader {
 PriceHistory read_price_history_from_csv_file(const std::string &file_name, const std::time_t start_time,
                                               const std::time_t end_time) {
     const std::time_t latency_start_time = std::time(nullptr);
-    logInfo(string_format("Reading price from csv file: -", file_name));
+    logInfo(string_format("Reading price from csv file:- ", file_name));
 
     // Memory map the file as string_view
     common_util::RMemoryMapped<char> read_file(file_name);
@@ -72,13 +71,12 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
         start = found + 1;
         volume = std::stof(temp_hold.data());
         price_history.push_back({time, price, volume});
-        if (!(price_history.size() % 1000000))
-            std::cout << "so far " << price_history.size() << " " << time << '\n';
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = price_history.size();
 
-    logInfo(string_format("Loaded ", total_record, " records in ", (latency_end_time - latency_start_time), " sec"));
+    logInfo(string_format("Loaded ", total_record, " records in ",
+                          duration_to_string(latency_end_time - latency_start_time)));
     return price_history;
 }
 
@@ -106,21 +104,6 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
     const char *begin = read_file.begin();
     size_t view_size = read_file.size();
     std::string_view input_file_view = std::string_view(begin, view_size);
-    // have a lambda to find location of next new line
-    auto new_line_pos = [&](uint64_t &start_pos) { return input_file_view.find('\n', start_pos); };
-    auto new_comma_pos = [&](uint64_t &start_pos) { return input_file_view.find(',', start_pos); };
-    auto next_comma_value = [&](uint64_t &start_pos, uint64_t &found_pos) {
-        found_pos = new_comma_pos(start_pos);
-        std::string temp_hold(input_file_view.substr(start_pos, found_pos));
-        start_pos = found_pos + 1;
-        return std::stof(temp_hold);
-    };
-    auto last_comma_value = [&](uint64_t &start_pos, uint64_t &found_pos) {
-        found_pos = new_line_pos(start_pos);
-        std::string temp_hold(input_file_view.substr(start_pos, found_pos));
-        start_pos = found_pos + 1;
-        return std::stof(temp_hold);
-    };
 
     uint64_t row = 0;
     int64_t timestamp_sec_prev = 0;
@@ -136,6 +119,22 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
 
     uint64_t start = 0;
     uint64_t found = view_size;
+
+    // have a lambda to find location of next new line
+    auto new_line_pos = [&](uint64_t &start_pos) { return input_file_view.find('\n', start_pos); };
+    auto new_comma_pos = [&](uint64_t &start_pos) { return input_file_view.find(',', start_pos); };
+    auto next_comma_value = [&](uint64_t &start_pos, uint64_t &found_pos) {
+        found_pos = new_comma_pos(start_pos);
+        std::string temp_hold(input_file_view.substr(start_pos, found_pos));
+        start_pos = found_pos + 1;
+        return std::stof(temp_hold);
+    };
+    auto last_comma_value = [&](uint64_t &start_pos, uint64_t &found_pos) {
+        found_pos = new_line_pos(start_pos);
+        std::string temp_hold(input_file_view.substr(start_pos, found_pos));
+        start_pos = found_pos + 1;
+        return std::stof(temp_hold);
+    };
 
     while (start < view_size) {
         std::string temp_hold;
@@ -176,7 +175,8 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = ohlc_history.size();
-    logInfo(string_format("Loaded ", total_record, " OHLC ticks in ", (latency_end_time - latency_start_time), " sec"));
+    logInfo(string_format("Loaded ", total_record, " OHLC ticks in ",
+                          duration_to_string(latency_end_time - latency_start_time)));
     return ohlc_history;
 }
 
@@ -203,9 +203,9 @@ void print_price_history_gaps(const PriceHistory &price_history, size_t top_n) {
     for (const HistoryGap &history_gap : history_gaps) {
         const int64_t gap_duration_sec = history_gap.second - history_gap.first;
         logInfo(string_format(history_gap.first, " ", '[', formate_time_utc(history_gap.first, "%Y-%m-%d %H:%M:%S"),
-                              ']', history_gap.second, " ", '[',
+                              "] - ", history_gap.second, " [",
                               formate_time_utc(history_gap.second, "%Y-%m-%d %H:%M:%S"),
-                              duration_to_string(gap_duration_sec)));
+                              "]: ", duration_to_string(gap_duration_sec)));
     }
 }
 
@@ -230,8 +230,8 @@ void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistor
         }
 
         logInfo(string_format((is_outlier ? " x" : "  "), ' ', price_record.timestamp_sec, " [",
-                              formate_time_utc(price_record.timestamp_sec), "]: ", price_record.price, " [",
-                              price_record.volume, ']'));
+                              formate_time_utc(price_record.timestamp_sec, "%Y-%m-%d %H:%M:%S"),
+                              "]: ", price_record.price, " [", price_record.volume, ']'));
         index_prev = index;
     }
 }
@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
     std::unordered_map<std::string, std::string> arg_map = get_command_line_argument(argc, argv);
     for (auto &val : arg_map) {
         if (!arg_valid(val.first)) {
-            logger.log(string_format(val.first, " arg is not valid"), Logger::Severity::ERROR);
+            logger.log(string_format(val.first, " argument is not valid"), Logger::Severity::ERROR);
             std::exit(EXIT_FAILURE);
         }
     }
@@ -293,8 +293,8 @@ int main(int argc, char *argv[]) {
         (arg_map["start_time"] == "" ? convert_time_string(START_TIME) : convert_time_string(arg_map["start_time"]));
     std::time_t end_time =
         arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
-    logger.log(string_format("Selected time period:- [", formate_time_utc(start_time), "] - [",
-                             formate_time_utc(end_time) + "]"),
+    logger.log(string_format("Selected time period:- [", formate_time_utc(start_time, "%Y-%m-%d %H:%M:%S"), "] - [",
+                             formate_time_utc(end_time, "%Y-%m-%d %H:%M:%S") + "]"),
                Logger::Severity::INFO);
 
     // Error :- Getting two input at same time
@@ -350,7 +350,12 @@ int main(int argc, char *argv[]) {
     // Ignore side history for now
 
     if (!price_history.empty()) {
-        logInfo(string_format("Top ", top_n_gaps, " gaps"));
+        logInfo(string_format("Top ", top_n_gaps, " gaps:"));
+        print_price_history_gaps(price_history, top_n_gaps);
+    }
+
+    if (!price_history.empty() && ohlc_history.empty() && !output_ohlc_history_binary_file.empty()) {
+        ohlc_history = convert_price_history_to_ohlc_history(price_history);
     }
 
     if (!price_history.empty() && !output_price_history_binary_file.empty())
@@ -359,8 +364,8 @@ int main(int argc, char *argv[]) {
     if (!ohlc_history.empty() && !output_ohlc_history_binary_file.empty())
         write_history_to_binary_file(ohlc_history, output_ohlc_history_binary_file);
 
-    std::cout << ohlc_history.size() << " " << ohlc_history.front().timestamp_sec << '\n';
-    std::cout << ohlc_history.size() << " " << ohlc_history.back().timestamp_sec << '\n';
+    // std::cout << ohlc_history.size() << " " << ohlc_history.front().timestamp_sec << '\n';
+    // std::cout << ohlc_history.size() << " " << ohlc_history.back().timestamp_sec << '\n';
 
     logger.close();
     return 0;

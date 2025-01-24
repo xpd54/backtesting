@@ -1,5 +1,6 @@
 #pragma once
 #include "../util/quick_log.hpp"
+#include "common_util/time_util.hpp"
 #include <common_util.hpp>
 #include <vector>
 using namespace common_util;
@@ -23,7 +24,7 @@ std::vector<T> read_history_from_binary_file(const std::string &file_name, const
             T history = *begin;
             if (start_time > 0 && history.timestamp_sec < start_time)
                 continue;
-            if (end_time > 0 && history.timestamp_sec > end_time)
+            if (end_time > 0 && history.timestamp_sec >= end_time)
                 break;
             if (validate(history)) {
                 price_history.push_back(history);
@@ -37,8 +38,8 @@ std::vector<T> read_history_from_binary_file(const std::string &file_name, const
     }
 
     const std::time_t latency_end_time = std::time(nullptr);
-    logInfo(string_format("loaded ", price_history.size(), " records in ", (latency_end_time - latency_start_time),
-                          " sec"));
+    logInfo(string_format("Loaded ", price_history.size(), " records in ",
+                          duration_to_string(latency_end_time - latency_start_time)));
     return price_history;
 }
 
@@ -54,7 +55,7 @@ bool write_history_to_binary_file(const std::vector<T> &history, const std::stri
     write_file.flush();
     const std::time_t latency_end_time = std::time(nullptr);
 
-    logInfo(string_format("finished in ", (latency_end_time - latency_start_time)));
+    logInfo(string_format("Finished in ", duration_to_string(latency_end_time - latency_start_time)));
     return true;
 }
 } // namespace back_trader
