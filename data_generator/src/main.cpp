@@ -236,6 +236,24 @@ void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistor
     }
 }
 
+// Removes outliers and resamples the price history into OHLC history.
+// Keeping Max_price_deviation_fix
+OhlcHistory convert_price_history_to_ohlc_history(const PriceHistory &price_history,
+                                                  const int sampling_rate_sec = SAMPLING_RATE_SEC) {
+    std::vector<size_t> outlier_indices;
+
+    const PriceHistory price_history_clean =
+        remove_outliers(price_history.begin(), price_history.end(), MAX_PRICE_DEVIATION_PER_MIN, &outlier_indices);
+
+    logInfo(string_format("Removed ", outlier_indices.size(), " outliers"));
+    logInfo(string_format("Last ", LAST_N_OUTLIERS, "outliers:"));
+    print_outliers_with_context(price_history.begin(), price_history.end(), outlier_indices, 5, 5, LAST_N_OUTLIERS);
+    const OhlcHistory ohlc_history =
+        resample(price_history_clean.begin(), price_history_clean.end(), sampling_rate_sec);
+    logInfo(string_format("Resampled ", price_history_clean.size(), "records to ", ohlc_history.size(), " OHLC ticks"));
+    return ohlc_history;
+}
+
 } // namespace back_trader
 
 int main(int argc, char *argv[]) {
