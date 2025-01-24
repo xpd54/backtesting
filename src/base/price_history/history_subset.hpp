@@ -1,5 +1,5 @@
 #pragma once
-#include "../common_interface/common.hpp"
+#include "common_interface/common.hpp"
 #include <cstdint>
 #include <utility>
 #include <vector>

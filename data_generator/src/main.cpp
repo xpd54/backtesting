@@ -1,5 +1,3 @@
-#include "../../src/base/base.hpp"
-#include "../../src/price_history/price_history.hpp"
 #include "binary_io/binary_read_write.hpp"
 #include "common_util/Logger.hpp"
 #include "common_util/memory_map_util.hpp"
@@ -7,6 +5,7 @@
 #include "common_util/time_util.hpp"
 #include "util/cmd_line_args.hpp"
 #include "util/quick_log.hpp"
+#include <base_header.hpp>
 #include <common_util.hpp>
 #include <cstddef>
 #include <cstdint>

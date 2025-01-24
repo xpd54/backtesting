@@ -9,12 +9,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 file(GLOB base_src
-  "src/base/*cpp"
-  "src/common_interface/*cpp"
-  "src/price_history/*cpp"
+  "src/base/**/*cpp"
 )
 include_directories(
-  src/**/
+  src/base/
 )
 
 add_library(base STATIC ${base_src})

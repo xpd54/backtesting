@@ -1,5 +1,5 @@
 #pragma once
-#include "../base/base.hpp"
+#include "history_subset.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <map>
