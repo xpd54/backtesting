@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
     std::unordered_map<std::string, std::string> arg_map = get_command_line_argument(argc, argv);
     for (auto &val : arg_map) {
         if (!arg_valid(val.first)) {
-            logger.log(val.first + " arg is not valid", Logger::Severity::ERROR);
+            logger.log(string_format(val.first, " arg is not valid"), Logger::Severity::ERROR);
             std::exit(EXIT_FAILURE);
         }
     }
@@ -293,7 +293,8 @@ int main(int argc, char *argv[]) {
         (arg_map["start_time"] == "" ? convert_time_string(START_TIME) : convert_time_string(arg_map["start_time"]));
     std::time_t end_time =
         arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
-    logger.log("Selected time period:- [" + formate_time_utc(start_time) + "] - [" + formate_time_utc(end_time) + "]",
+    logger.log(string_format("Selected time period:- [", formate_time_utc(start_time), "] - [",
+                             formate_time_utc(end_time) + "]"),
                Logger::Severity::INFO);
 
     // Error :- Getting two input at same time
