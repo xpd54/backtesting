@@ -7,5 +7,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+file(GLOB base_src
+  "src/base/*cpp"
+  "src/common_interface/*cpp"
+  "src/price_history/*cpp"
+)
+include_directories(
+  src/**/
+)
+
+add_library(base STATIC ${base_src})
 add_subdirectory(external/common_util)
 add_subdirectory(data_generator)

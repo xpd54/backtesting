@@ -7,4 +7,7 @@ file(GLOB data_generator_src
         "src/util/*.cpp"
 )
 add_executable(${PROJECT_NAME} ${data_generator_src})
-target_link_libraries(${PROJECT_NAME} PRIVATE common_util)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+        common_util 
+        base
+ )

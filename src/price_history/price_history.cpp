@@ -44,7 +44,7 @@ std::vector<HistoryGap> get_price_history_gap(PriceHistory::const_iterator begin
         return delta > 0 || (delta == 0 && left.first < right.first);
     };
 
-    std::priority_queue<HistoryGap, std::vector<HistoryGap>, decltype(gap_compare)> queue;
+    std::priority_queue<HistoryGap, std::vector<HistoryGap>, decltype(gap_compare)> queue(gap_compare);
     if (start_timestamp_sec > 0) {
         queue.push(HistoryGap{start_timestamp_sec, begin->timestamp_sec});
     }
