@@ -246,11 +246,12 @@ OhlcHistory convert_price_history_to_ohlc_history(const PriceHistory &price_hist
         remove_outliers(price_history.begin(), price_history.end(), MAX_PRICE_DEVIATION_PER_MIN, &outlier_indices);
 
     logInfo(string_format("Removed ", outlier_indices.size(), " outliers"));
-    logInfo(string_format("Last ", LAST_N_OUTLIERS, "outliers:"));
+    logInfo(string_format("Last ", LAST_N_OUTLIERS, " outliers:"));
     print_outliers_with_context(price_history.begin(), price_history.end(), outlier_indices, 5, 5, LAST_N_OUTLIERS);
     const OhlcHistory ohlc_history =
         resample(price_history_clean.begin(), price_history_clean.end(), sampling_rate_sec);
-    logInfo(string_format("Resampled ", price_history_clean.size(), "records to ", ohlc_history.size(), " OHLC ticks"));
+    logInfo(
+        string_format("Resampled ", price_history_clean.size(), " records to ", ohlc_history.size(), " OHLC ticks"));
     return ohlc_history;
 }
 
@@ -355,7 +356,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (!price_history.empty() && ohlc_history.empty() && !output_ohlc_history_binary_file.empty()) {
-        ohlc_history = convert_price_history_to_ohlc_history(price_history);
+        ohlc_history = convert_price_history_to_ohlc_history(price_history, sampling_rate_sec);
     }
 
     if (!price_history.empty() && !output_price_history_binary_file.empty())
