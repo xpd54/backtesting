@@ -258,7 +258,11 @@ int main(int argc, char *argv[]) {
 
     if (!input_price_history_binary_file.empty())
         history = read_price_histry_from_binary_file(input_price_history_binary_file, start_time, end_time);
-    std::cout << history.size() << " " << history.front().timestamp_sec << '\n';
+    OhlcHistory ohlc_history;
+    if (!input_ohlc_history_csv_file.empty())
+        ohlc_history = read_ohlc_history_from_csv_file(input_ohlc_history_csv_file, start_time, end_time);
+    std::cout << ohlc_history.size() << " " << ohlc_history.front().timestamp_sec << '\n';
+    std::cout << ohlc_history.size() << " " << ohlc_history.back().timestamp_sec << '\n';
 
     logger.close();
     return 0;
