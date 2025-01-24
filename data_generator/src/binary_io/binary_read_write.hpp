@@ -9,7 +9,7 @@ template <typename T>
 std::vector<T> read_history_from_binary_file(const std::string &file_name, const std::time_t start_time,
                                              const std::time_t end_time, std::function<bool(const T &)> validate) {
     const std::time_t latency_start_time = std::time(nullptr);
-    logInfo("Reading history from binary file" + file_name);
+    logInfo(string_format("Reading history from binary file ", file_name));
     common_util::RMemoryMapped<T> read_file(file_name);
     const T *begin = read_file.begin();
     const T *end = read_file.end();
@@ -29,7 +29,7 @@ std::vector<T> read_history_from_binary_file(const std::string &file_name, const
                 price_history.push_back(history);
                 ++valid_count;
             } else {
-                logError("Reading history from binary file, Invalid at line number " + std::to_string(valid_count));
+                logError(string_format("Reading history from binary file, Invalid at line number ", valid_count));
                 break;
             }
             ++begin;
@@ -37,15 +37,15 @@ std::vector<T> read_history_from_binary_file(const std::string &file_name, const
     }
 
     const std::time_t latency_end_time = std::time(nullptr);
-    logInfo("loaded " + std::to_string(price_history.size()) + " records in " +
-            std::to_string((latency_end_time - latency_start_time)) + " sec");
+    logInfo(string_format("loaded ", price_history.size(), " records in ", (latency_end_time - latency_start_time),
+                          " sec"));
     return price_history;
 }
 
 template <typename T>
 bool write_history_to_binary_file(const std::vector<T> &history, const std::string &output_price_history_binary_file) {
     const std::time_t latency_start_time = std::time(nullptr);
-    logInfo("Number of records " + std::to_string(history.size()) + "to file " + output_price_history_binary_file);
+    logInfo(string_format("Number of records ", history.size(), " to file ", output_price_history_binary_file));
     // Memory map the file to output binary file
     size_t file_size = sizeof(T) * history.size();
     common_util::WMemoryMapped<T> write_file(output_price_history_binary_file, file_size);
@@ -53,7 +53,8 @@ bool write_history_to_binary_file(const std::vector<T> &history, const std::stri
     std::copy(history.begin(), history.end(), begin);
     write_file.flush();
     const std::time_t latency_end_time = std::time(nullptr);
-    logInfo("finished in " + std::to_string(latency_end_time - latency_start_time));
+
+    logInfo(string_format("finished in ", (latency_end_time - latency_start_time)));
     return true;
 }
 } // namespace back_trader

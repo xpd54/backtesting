@@ -24,7 +24,7 @@ namespace back_trader {
 PriceHistory read_price_history_from_csv_file(const std::string &file_name, const std::time_t start_time,
                                               const std::time_t end_time) {
     const std::time_t latency_start_time = std::time(nullptr);
-    logInfo("Reading price from csv file: -" + file_name);
+    logInfo(string_format("Reading price from csv file: -", file_name));
 
     // Memory map the file as string_view
     common_util::RMemoryMapped<char> read_file(file_name);
@@ -77,8 +77,7 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = price_history.size();
 
-    logInfo("Loaded " + std::to_string(total_record) + " records in " +
-            std::to_string(latency_end_time - latency_start_time) + " sec");
+    logInfo(string_format("Loaded ", total_record, " records in ", (latency_end_time - latency_start_time), " sec"));
     return price_history;
 }
 
@@ -101,7 +100,7 @@ PriceHistory read_price_histry_from_binary_file(const std::string &file_name, co
 OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const std::time_t start_time,
                                             const std::time_t end_time) {
     const std::time_t latency_start_time = std::time(nullptr);
-    logInfo("Reading OHLC history from csv file " + file_name);
+    logInfo(string_format("Reading OHLC history from:- ", file_name));
     common_util::RMemoryMapped<char> read_file(file_name);
     const char *begin = read_file.begin();
     size_t view_size = read_file.size();
@@ -176,8 +175,7 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = ohlc_history.size();
-    logInfo("Loaded " + std::to_string(total_record) + " OHLC ticks in " +
-            std::to_string(latency_end_time - latency_start_time) + " sec");
+    logInfo(string_format("Loaded ", total_record, " OHLC ticks in ", (latency_end_time - latency_start_time), " sec"));
     return ohlc_history;
 }
 
@@ -305,7 +303,7 @@ int main(int argc, char *argv[]) {
     // Ignore side history for now
 
     if (!price_history.empty()) {
-        logInfo("Top " + std::to_string(top_n_gaps) + " gaps");
+        logInfo(string_format("Top ", top_n_gaps, " gaps"));
     }
 
     if (!price_history.empty() && !output_price_history_binary_file.empty())
