@@ -89,5 +89,47 @@ struct Account {
     bool market_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_ammount);
 
     /*------------- Execute Stop Orders (Buy/Sell When Market Rise/Fall To Stop Price) ---------------------------*/
+
+    /* Execute stop buy order of base ammount at stop_price. Stop Buy only get executed when price Rise to stop_price
+     * price. (When given OHLC high price is >= stop_price) */
+    bool stop_buy(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float stop_price);
+
+    /* Execute stop buy order of quote_ammount of quote currency at stop_price. Stop Buy only get executed when price
+     * RISE to stop_price price. (When given OHLC high price is >= stop_price) */
+    bool stop_buy_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount,
+                           float stop_price);
+
+    /* Execute stop sell order of base_ammount in base currency (BTC) at stop_price. Stop Sell only get executed when
+     * price FALLS to stop_price price. (When given OHLC low price is <= stop_price) */
+    bool stop_sell(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float stop_price);
+
+    /* Execute stop sell order of quote_ammount in quote currency (USD) at stop_price. Stop Sell only get executed when
+     * price FALLS to stop_stop price. (When given OHLC low price is <= stop_price) */
+    bool stop_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount,
+                            float stop_price);
+
+    /*------------- Execute Limit Orders (Buy/Sell When Market Rise/Fall To Stop Price) ---------------------------*/
+
+    /* Execute limit buy order of base ammount at limit_price. Limit Buy only get executed when price FALLS to
+     * limit_price price. (When given OHLC low price is <= limit_price) */
+    bool limit_buy(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float limit_price);
+
+    /* Execute limit buy order of quote_ammount of quote currency at limit_price. Limit Buy only get executed when price
+     * FALLS to limit_price price. (When given OHLC low price is <= limit_price) */
+    bool limit_buy_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount,
+                            float limit_price);
+
+    /* Execute limit sell order of base_ammount in base currency (BTC) at limit_price. Limit Sell only get executed when
+     * price RISE to limit_price price. (When given OHLC high price is >= limit_price) */
+    bool limit_sell(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float limit_price);
+
+    /* Execute limit sell order of quote_ammount in quote currency (USD) at limit_price. Limit Sell only get executed
+     * when price RISE to limit_price price. (When given OHLC high price is >= limit_price) */
+    bool limit_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount,
+                             float limit_price);
+
+    /*------------- Execute General Orders---------------------------*/
+    // Execute the order over the given ohlc_tick.
+    bool execute_order(const AccountConfig &account_config, const Order &order, const OhlcTick &ohlc_tick);
 };
 } // namespace back_trader
