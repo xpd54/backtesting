@@ -242,9 +242,62 @@ bool Account::stop_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &oh
     if (ohlc_tick.low > stop_price) {
         return false;
     }
-
     const float price = get_stop_sell_price(ohlc_tick, stop_price);
     return sell_at_quote(fee_config, quote_amount, price);
 }
 
+/*------------- Execute Limit Orders (Buy/Sell When Market Rise/Fall To Stop Price) ---------------------------*/
+
+bool Account::limit_buy(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float limit_price) {
+    assert(limit_price > 0);
+    assert(base_amount >= 0);
+
+    /* Limit buy order only get executed when price FALL below the limit_price */
+    if (ohlc_tick.low > limit_price) {
+        return false;
+    }
+
+    base_amount = std::min(base_amount, get_max_base_amount(ohlc_tick));
+    return buy_base_currency(fee_config, base_amount, limit_price);
+}
+
+bool Account::limit_buy_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount,
+                                 float limit_price) {
+    assert(limit_price > 0);
+    assert(quote_amount >= 0);
+
+    /* Limit buy order only get executed when price FALL below the limit_price */
+    if (ohlc_tick.low > limit_price) {
+        return false;
+    }
+
+    const float max_base_amount = get_max_base_amount(ohlc_tick);
+    return buy_at_quote(fee_config, quote_amount, limit_price, max_base_amount);
+}
+
+bool Account::limit_sell(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float limit_price) {
+    assert(limit_price > 0);
+    assert(base_amount >= 0);
+
+    /* Limit sell order only get executed when price RISE above the limit_price */
+    if (ohlc_tick.high < limit_price) {
+        return false;
+    }
+
+    base_amount = std::min(base_amount, get_max_base_amount(ohlc_tick));
+    return sell_base_currency(fee_config, base_amount, limit_price);
+}
+
+bool Account::limit_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount,
+                                  float limit_price) {
+    assert(limit_price > 0);
+    assert(quote_amount >= 0);
+
+    /* Limit sell order only get executed when price RISE above the limit_price */
+    if (ohlc_tick.high < limit_price) {
+        return false;
+    }
+    const float max_base_amount = get_max_base_amount(ohlc_tick);
+    return sell_at_quote(fee_config, quote_amount, limit_price, max_base_amount);
+}
 } // namespace back_trader
