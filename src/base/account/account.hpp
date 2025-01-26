@@ -55,7 +55,7 @@ struct Account {
     /* Price of Stop sell order based of market liquidity executed over given OHLC tick and Stop price.*/
     float get_stop_sell_price(const OhlcTick &ohlc_tick, float stop_price) const;
 
-    /*------------------------------------- Order At Specific Price ---------------------------------------------*/
+    /*----------------------------------- Execute Order At Specific Price -------------------------------------------*/
 
     /* Buy amount of base currency at given price*/
     bool buy_base_currency(const FeeConfig &fee_config, float base_amount, float price);
@@ -76,7 +76,7 @@ struct Account {
     /*------------- Execute Market Orders (Buy/Sell at market price itself) -----------------------------------*/
 
     /* Execute market buy order of base_amount (volume of btc). (I want to buy 0.04 BTC)*/
-    bool market_buy(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_ammout);
+    bool market_buy(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount);
 
     /* Execute market buy order spending most of quote_amount (USD). (I want to buy $100 worth of BTC/ may be just for
      * $94 depending on base_unit)*/
@@ -89,6 +89,7 @@ struct Account {
     bool market_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount);
 
     /*------------- Execute Stop Orders (Buy/Sell When Market Rise/Fall To Stop Price) ---------------------------*/
+
     // (https://www.investopedia.com/terms/s/stoporder.asp)
     /* Execute stop buy order of base amount at stop_price. Stop Buy only get executed when price Rise to stop_price
      * price. (When given OHLC high price is >= stop_price) */

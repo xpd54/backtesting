@@ -2,6 +2,7 @@
 #include "common_interface/common.hpp"
 #include <algorithm>
 #include <cassert>
+#include <limits>
 namespace back_trader {
 
 float Floor(float amount, float unit) { return unit > 0 ? unit * std::floor(amount / unit) : amount; }
@@ -68,7 +69,7 @@ float Account::get_stop_sell_price(const OhlcTick &ohlc_tick, float stop_price) 
     return market_liquidity * std::min(stop_price, ohlc_tick.open) + (1.0f - market_liquidity) * ohlc_tick.low;
 }
 
-/*------------------------------------- Order At Specific Price ---------------------------------------------*/
+/*------------------------------------- Execute Order At Specific Price ---------------------------------------------*/
 
 bool Account::buy_base_currency(const FeeConfig &fee_config, float base_amount, float price) {
     assert(price > 0);
@@ -114,7 +115,7 @@ bool Account::buy_at_quote(const FeeConfig &fee_config, float quote_amount, floa
 
     const float base_amount = Floor(std::min((quote_amount - quote_fee) / price, max_base_amount), base_unit);
 
-    /* buy base ammount is smaller than lowest denomination*/
+    /* buy base amount is smaller than lowest denomination*/
     if (base_amount < base_unit) {
         return false;
     }
@@ -158,7 +159,7 @@ bool Account::sell_at_quote(const FeeConfig &fee_config, float quote_amount, flo
     const float quote_fee = get_fee(fee_config, quote_amount);
     const float base_amount = Floor(std::min((quote_amount + quote_fee) / price, max_base_amount), base_unit);
 
-    /* Selling lower ammount of base currency than lowest denomination of base currency*/
+    /* Selling lower amount of base currency than lowest denomination of base currency*/
     if (base_amount < base_unit) {
         return false;
     }
@@ -171,4 +172,79 @@ bool Account::sell_at_quote(const FeeConfig &fee_config, float quote_amount, flo
      */
     return sell_base_currency(fee_config, base_amount, price);
 }
+
+/*------------- Execute Market Orders (Buy/Sell at market price itself) -----------------------------------*/
+
+bool Account::market_buy(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount) {
+    const float price = get_market_buy_price(ohlc_tick);
+    return buy_base_currency(fee_config, base_amount, price);
+}
+
+bool Account::market_buy_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount) {
+    const float price = get_market_buy_price(ohlc_tick);
+    return buy_at_quote(fee_config, quote_amount, price);
+}
+
+bool Account::market_sell(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount) {
+    const float price = get_market_sell_price(ohlc_tick);
+    return sell_base_currency(fee_config, base_amount, price);
+}
+
+bool Account::market_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount) {
+    const float price = get_market_sell_price(ohlc_tick);
+    return sell_at_quote(fee_config, quote_amount, price);
+}
+
+/*------------- Execute Stop Orders (Buy/Sell When Market Rise/Fall To Stop Price) ---------------------------*/
+
+bool Account::stop_buy(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float stop_price) {
+    assert(stop_price > 0);
+    assert(base_amount >= 0);
+
+    /* Stop buy order only get executed when price RISE above the stop_price*/
+    if (ohlc_tick.high < stop_price) {
+        return false;
+    }
+    const float price = get_stop_buy_price(ohlc_tick, stop_price);
+    return buy_base_currency(fee_config, base_amount, price);
+}
+
+bool Account::stop_buy_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount,
+                                float stop_price) {
+    assert(stop_price > 0);
+    assert(quote_amount >= 0);
+    /* Stop buy order only get executed when price RISE above the stop_price*/
+    if (ohlc_tick.high < stop_price) {
+        return false;
+    }
+    const float price = get_stop_buy_price(ohlc_tick, stop_price);
+    return buy_at_quote(fee_config, quote_amount, price);
+}
+
+bool Account::stop_sell(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float stop_price) {
+    assert(stop_price > 0);
+    assert(base_amount >= 0);
+
+    /* Stop sell order only get executed when price FALL below the stop_price*/
+    if (ohlc_tick.low > stop_price) {
+        return false;
+    }
+    const float price = get_stop_sell_price(ohlc_tick, stop_price);
+    return sell_base_currency(fee_config, base_amount, price);
+}
+
+bool Account::stop_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_amount,
+                                 float stop_price) {
+    assert(stop_price > 0);
+    assert(quote_amount >= 0);
+
+    /* Stop sell order only get executed when price FALL below the stop_price*/
+    if (ohlc_tick.low > stop_price) {
+        return false;
+    }
+
+    const float price = get_stop_sell_price(ohlc_tick, stop_price);
+    return sell_at_quote(fee_config, quote_amount, price);
+}
+
 } // namespace back_trader
