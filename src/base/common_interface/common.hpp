@@ -2,6 +2,7 @@
 /*Common class, struct, data structure used across data_generator and backtesting trade*/
 
 #include <cstdint>
+#include <variant>
 namespace back_trader {
 
 /*
@@ -76,24 +77,34 @@ struct AccountConfig {
 };
 
 struct Order {
-    enum struct Type {
+    enum class Type {
         MARKET,
         STOP,
         LIMIT,
     };
 
-    enum struct Side {
+    enum class Side {
         BUY,
         SELL,
     };
 
-    struct oneof_amount {
-        // The amount of base (crypto) currency to by buy / sell.
+    // The amount of base (crypto) currency to by buy / sell.
+    struct BaseAmount {
         float base_amount;
-        // The (maximum) amount of quote to be spent on buying (or to be received
-        // when selling) the base (crypto) currency.
-        // The actual traded amount might be smaller due to exchange fees.
+    };
+
+    /* The (maximum) amount of quote to be spent on buying (or to be received
+    when selling) the base (crypto) currency.
+    The actual traded amount might be smaller due to exchange fees. */
+    struct QuoteAmount {
         float quote_amount;
     };
+
+    using AmountType = std::variant<BaseAmount, QuoteAmount>;
+
+    AmountType amount;
+    Type type;
+    Side side;
+    float price;
 };
 } // namespace back_trader

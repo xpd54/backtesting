@@ -33,7 +33,7 @@ struct Account {
     float max_volume_ratio = 0.0f;
 
     /* Initialize the account with config*/
-    void init_Account(const AccountConfig &account_confg);
+    void init_account(const AccountConfig &account_confg);
 
     /* Fee in quote currency according to fee_config and given quote currency ammount in the transaciton.*/
     float get_fee(const FeeConfig &fee_config, float quote_ammount) const;
@@ -89,7 +89,7 @@ struct Account {
     bool market_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float quote_ammount);
 
     /*------------- Execute Stop Orders (Buy/Sell When Market Rise/Fall To Stop Price) ---------------------------*/
-
+    // (https://www.investopedia.com/terms/s/stoporder.asp)
     /* Execute stop buy order of base ammount at stop_price. Stop Buy only get executed when price Rise to stop_price
      * price. (When given OHLC high price is >= stop_price) */
     bool stop_buy(const FeeConfig &fee_config, const OhlcTick &ohlc_tick, float base_amount, float stop_price);
