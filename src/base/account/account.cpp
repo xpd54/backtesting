@@ -2,9 +2,7 @@
 #include "common_interface/common.hpp"
 #include <algorithm>
 #include <cassert>
-#include <functional>
 #include <limits>
-#include <unordered_map>
 #include <variant>
 namespace back_trader {
 
