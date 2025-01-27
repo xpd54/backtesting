@@ -1,6 +1,7 @@
 
 #pragma once
 #include "common_interface/common.hpp"
+#include <memory>
 namespace back_trader {
 
 /*
@@ -48,5 +49,21 @@ class TradeSimulator {
                         float quote_balance, std::vector<Order> &orders) = 0;
     // Returns the internal TradeSimulator state (as a string).
     virtual std::string get_internal_state() const = 0;
+};
+
+// It can emit a new instance of the same simulator (with the same configuration) whenever needed.
+class SimulatorDispatcher {
+  public:
+    SimulatorDispatcher() {}
+    ~SimulatorDispatcher() {}
+
+    /*
+     Returns a name identifying all TradeSimulator dispatched.
+     The name should be escaped for the CSV file format.
+    */
+    virtual std::string get_names() const = 0;
+
+    // Returns a new instance of a TradeSimulator
+    virtual std::unique_ptr<TradeSimulator> new_simulator() const = 0;
 };
 } // namespace back_trader
