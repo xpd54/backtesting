@@ -2,7 +2,10 @@
 #include "common_interface/common.hpp"
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <limits>
+#include <unordered_map>
+#include <variant>
 namespace back_trader {
 
 float Floor(float amount, float unit) { return unit > 0 ? unit * std::floor(amount / unit) : amount; }
@@ -299,5 +302,76 @@ bool Account::limit_sell_at_quote(const FeeConfig &fee_config, const OhlcTick &o
     }
     const float max_base_amount = get_max_base_amount(ohlc_tick);
     return sell_at_quote(fee_config, quote_amount, limit_price, max_base_amount);
+}
+
+bool Account::execute_order(const AccountConfig &account_config, const Order &order, const OhlcTick &ohlc_tick) {
+    assert(is_valid_order(order));
+    float possible_base_amount = std::holds_alternative<Order::BaseAmount>(order.amount)
+                                     ? std::get<Order::BaseAmount>(order.amount).base_amount
+                                     : 0.0;
+    float possible_quote_amount = std::holds_alternative<Order::QuoteAmount>(order.amount)
+                                      ? std::get<Order::QuoteAmount>(order.amount).quote_amount
+                                      : 0.0;
+    switch (order.type) {
+    case Order::Type::MARKET: {
+        if (order.side == Order::Side::BUY) {
+            if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
+                return market_buy(account_config.market_order_fee_config, ohlc_tick, possible_base_amount);
+            } else {
+                return market_buy_at_quote(account_config.market_order_fee_config, ohlc_tick, possible_quote_amount);
+            }
+        } else {
+            assert(order.size == Order::Side::SELL);
+            if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
+                return market_sell(account_config.market_order_fee_config, ohlc_tick, possible_base_amount);
+            } else {
+                assert(std::holds_alternative<Order::QuoteAmount>(order.amount));
+                return market_sell_at_quote(account_config.market_order_fee_config, ohlc_tick, possible_quote_amount);
+            }
+        }
+    } break;
+    case Order::Type::STOP: {
+        if (order.side == Order::Side::BUY) {
+            if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
+                return stop_buy(account_config.stop_order_fee_config, ohlc_tick, possible_base_amount, order.price);
+            } else {
+                assert(std::holds_alternative<Order::QuoteAmount>(order.amount));
+                return stop_buy_at_quote(account_config.stop_order_fee_config, ohlc_tick, possible_quote_amount,
+                                         order.price);
+            }
+        } else {
+            assert(order.size == Order::Side::SELL);
+            if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
+                return stop_sell(account_config.stop_order_fee_config, ohlc_tick, possible_base_amount, order.price);
+            } else {
+                assert(std::holds_alternative<Order::QuoteAmount>(order.amount));
+                return stop_sell_at_quote(account_config.stop_order_fee_config, ohlc_tick, possible_quote_amount,
+                                          order.price);
+            }
+        }
+    } break;
+    case Order::Type::LIMIT: {
+        if (order.side == Order::Side::BUY) {
+            if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
+                return limit_buy(account_config.limit_order_fee_config, ohlc_tick, possible_base_amount, order.price);
+            } else {
+                assert(std::holds_alternative<Order::QuoteAmount>(order.amount));
+                return limit_buy_at_quote(account_config.limit_order_fee_config, ohlc_tick, possible_quote_amount,
+                                          order.price);
+            }
+        } else {
+            assert(order.size == Order::Side::SELL);
+            if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
+                return limit_sell(account_config.limit_order_fee_config, ohlc_tick, possible_base_amount, order.price);
+            } else {
+                assert(std::holds_alternative<Order::QuoteAmount>(order.amount));
+                return limit_sell_at_quote(account_config.limit_order_fee_config, ohlc_tick, possible_quote_amount,
+                                           order.price);
+            }
+        }
+    } break;
+    default:
+        assert(false);
+    }
 }
 } // namespace back_trader
