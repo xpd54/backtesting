@@ -1,6 +1,6 @@
 
 #pragma once
-#include "common_interface/common.hpp"
+#include <base_header.hpp>
 #include <memory>
 namespace back_trader {
 
