@@ -1,8 +1,11 @@
 #include "rebalancing_simulator.hpp"
 #include "common_interface/common.hpp"
+#include "common_util/string_format_util.hpp"
 #include <cassert>
+#include <common_util.hpp>
 #include <cstdint>
 
+using namespace common_util;
 namespace back_trader {
 void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vector<float> &side_input_signals,
                                        float base_balance, float quote_balance, std::vector<Order> &orders) {
@@ -83,9 +86,16 @@ void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vec
             buy_order.price = buy_price;
         }
     }
+
+    // save the state of trade
     last_base_balance = base_balance;
     last_quote_balance = quote_balance;
     last_timestamp_sec = timestamp_sec;
     last_close = price;
 }
+
+std::string RebalancingTradeSimulator::get_internal_state() const {
+    return string_format(last_timestamp_sec, last_base_balance, last_quote_balance, last_close);
+}
+
 } // namespace back_trader

@@ -13,6 +13,7 @@ class RebalancingTradeSimulator : public TradeSimulator {
     virtual ~RebalancingTradeSimulator() {}
     void update(const OhlcTick &ohlc_tick, const std::vector<float> &side_input_signals, float base_balance,
                 float quote_balance, std::vector<Order> &orders) override;
+    std::string get_internal_state() const override;
 
   private:
     RebalancingTradeSimulatorConfig config;
