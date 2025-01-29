@@ -26,6 +26,7 @@ class RebalancingTradeSimulator : public TradeSimulator {
     float last_close = 0.0f;
 };
 
+// helper class of Rrebalancing simulator to get different instance of same simulator
 class RebalancingSimulatorDispatcher : public SimulatorDispatcher {
   public:
     explicit RebalancingSimulatorDispatcher(const RebalancingTradeSimulatorConfig &simulator_config)
@@ -34,6 +35,7 @@ class RebalancingSimulatorDispatcher : public SimulatorDispatcher {
     std::string get_names() const override;
     std::unique_ptr<TradeSimulator> new_simulator() const override;
 
+    // Take list of alphas and epsilons and return simulaterdispatcher with all combinations of alphas and epsilons
     static std::vector<std::unique_ptr<SimulatorDispatcher>> get_batch_of_simulator(const std::vector<float> &alphas,
                                                                                     const std::vector<float> &epsilons);
 

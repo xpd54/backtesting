@@ -4,9 +4,11 @@
 #include <cassert>
 #include <common_util.hpp>
 #include <cstdint>
+#include <memory>
 
 using namespace common_util;
 namespace back_trader {
+// keep side input (fear & greed index for future dev)
 void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vector<float> &side_input_signals,
                                        float base_balance, float quote_balance, std::vector<Order> &orders) {
     const int64_t timestamp_sec = ohlc_tick.timestamp_sec;
@@ -98,4 +100,26 @@ std::string RebalancingTradeSimulator::get_internal_state() const {
     return string_format(last_timestamp_sec, last_base_balance, last_quote_balance, last_close);
 }
 
+std::string RebalancingSimulatorDispatcher::get_names() const {
+    return string_format("rebalancing_simulator[", config.alpha, '|', config.epsilon, ']');
+}
+
+std::unique_ptr<TradeSimulator> RebalancingSimulatorDispatcher::new_simulator() const {
+    return std::make_unique<RebalancingTradeSimulator>(config);
+}
+
+std::vector<std::unique_ptr<SimulatorDispatcher>>
+RebalancingSimulatorDispatcher::get_batch_of_simulator(const std::vector<float> &alphas,
+                                                       const std::vector<float> &epsilons) {
+    std::vector<std::unique_ptr<SimulatorDispatcher>> dispatchers;
+
+    dispatchers.reserve(alphas.size() * epsilons.size());
+    // get all combination of alphas and epsilons
+    for (auto &alpha : alphas)
+        for (auto &epsilon : epsilons) {
+            RebalancingTradeSimulatorConfig sim_config{alpha, epsilon};
+            dispatchers.emplace_back(new RebalancingSimulatorDispatcher(sim_config));
+        }
+    return dispatchers;
+}
 } // namespace back_trader
