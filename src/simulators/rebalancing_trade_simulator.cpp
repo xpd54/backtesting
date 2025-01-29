@@ -1,4 +1,4 @@
-#include "rebalancing_simulator.hpp"
+#include "rebalancing_trade_simulator.hpp"
 #include "common_interface/common.hpp"
 #include "common_util/string_format_util.hpp"
 #include <cassert>
