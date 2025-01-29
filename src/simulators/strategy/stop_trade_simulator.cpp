@@ -2,7 +2,6 @@
 #include "common_interface/common.hpp"
 #include "common_util/string_format_util.hpp"
 #include "price_history/history_subset.hpp"
-#include "trade_simulator/trade_simulator.hpp"
 #include <cassert>
 #include <common_util.hpp>
 #include <cstdint>

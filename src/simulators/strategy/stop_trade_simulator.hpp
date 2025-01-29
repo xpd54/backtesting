@@ -1,6 +1,6 @@
 #pragma once
 #include "common_strategy_config.hpp"
-#include "trade_simulator/trade_simulator.hpp"
+#include <base_header.hpp>
 namespace back_trader {
 class StopTradeSimulator : public TradeSimulator {
   public:

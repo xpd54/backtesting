@@ -1,4 +1,4 @@
-
+#pragma once
 namespace back_trader {
 // Rebalancing configuration.
 struct RebalancingTradeSimulatorConfig {
