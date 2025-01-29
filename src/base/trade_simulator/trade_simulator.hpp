@@ -36,7 +36,7 @@ it is encouraged to test the TradeSimulator on OHLC histories with varying sampl
 class TradeSimulator {
   public:
     TradeSimulator(){};
-    ~TradeSimulator() {}
+    virtual ~TradeSimulator() {}
     /*
       Updates the (internal) trader state and emits zero or more orders.
       We assume that "orders" is not null and points to an empty vector.
@@ -55,7 +55,7 @@ class TradeSimulator {
 class SimulatorDispatcher {
   public:
     SimulatorDispatcher() {}
-    ~SimulatorDispatcher() {}
+    virtual ~SimulatorDispatcher() {}
 
     /*
      Returns a name identifying all TradeSimulator dispatched.
