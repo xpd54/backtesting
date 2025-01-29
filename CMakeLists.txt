@@ -25,7 +25,7 @@ add_subdirectory(data_generator)
 
 file(GLOB simulator_src
   "src/*.cpp"
-  "src/simulators/*.cpp"
+  "src/simulators/**/*.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${simulator_src} ${base_src})

@@ -4,10 +4,10 @@
 #include <utility>
 #include <vector>
 namespace back_trader {
-constexpr int SecondsPerMinute = 60;
-constexpr int SecondsPerHour = 60 * 60;
-constexpr int SecondsPerDay = 24 * 60 * 60;
-constexpr int SecondsPerWeek = 7 * 24 * 60 * 60;
+constexpr int64_t SecondsPerMinute = 60;
+constexpr int64_t SecondsPerHour = 60 * 60;
+constexpr int64_t SecondsPerDay = 24 * 60 * 60;
+constexpr int64_t SecondsPerWeek = 7 * 24 * 60 * 60;
 
 // Historical prices over time.
 using PriceHistory = std::vector<PriceRecord>;

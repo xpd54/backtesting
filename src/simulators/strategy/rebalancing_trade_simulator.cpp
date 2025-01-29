@@ -20,8 +20,8 @@ void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vec
     // whole value of this porfolio depends on the current price of base currency
     const float current_portfolio_value = base_balance * price + quote_balance;
 
-    const float alpha = config.alpha;
-    const float epsilon = config.epsilon;
+    const float alpha = _sim_config.alpha;
+    const float epsilon = _sim_config.epsilon;
 
     /*
      *epsilon is defined as allowed deviaton from original alocation of ratio of base_currency over quote_currency
@@ -90,18 +90,18 @@ void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vec
     }
 
     // save the state of trade
-    last_base_balance = base_balance;
-    last_quote_balance = quote_balance;
-    last_timestamp_sec = timestamp_sec;
-    last_close = price;
+    _last_base_balance = base_balance;
+    _last_quote_balance = quote_balance;
+    _last_timestamp_sec = timestamp_sec;
+    _last_close = price;
 }
 
 std::string RebalancingTradeSimulator::get_internal_state() const {
-    return string_format(last_timestamp_sec, last_base_balance, last_quote_balance, last_close);
+    return string_format(_last_timestamp_sec, _last_base_balance, _last_quote_balance, _last_close);
 }
 
 std::string RebalancingSimulatorDispatcher::get_names() const {
-    return string_format("rebalancing_simulator[", config.alpha, '|', config.epsilon, ']');
+    return string_format("rebalancing_trade_simulator[", config.alpha, '|', config.epsilon, ']');
 }
 
 std::unique_ptr<TradeSimulator> RebalancingSimulatorDispatcher::new_simulator() const {
@@ -115,8 +115,8 @@ RebalancingSimulatorDispatcher::get_batch_of_simulator(const std::vector<float> 
 
     dispatchers.reserve(alphas.size() * epsilons.size());
     // get all combination of alphas and epsilons
-    for (auto &alpha : alphas)
-        for (auto &epsilon : epsilons) {
+    for (const auto &alpha : alphas)
+        for (const auto &epsilon : epsilons) {
             RebalancingTradeSimulatorConfig sim_config{alpha, epsilon};
             dispatchers.emplace_back(new RebalancingSimulatorDispatcher(sim_config));
         }
