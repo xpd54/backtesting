@@ -1,6 +1,7 @@
 #pragma once
 /*Common class, struct, data structure used across data_generator and backtesting trade*/
 
+#include <array>
 #include <cstdint>
 #include <variant>
 namespace back_trader {
@@ -78,14 +79,17 @@ struct AccountConfig {
 
 struct Order {
     enum class Type {
+
         MARKET,
         STOP,
         LIMIT,
+        Count,
     };
 
     enum class Side {
         BUY,
         SELL,
+        Count,
     };
 
     // The amount of base (crypto) currency to by buy / sell.
@@ -107,4 +111,33 @@ struct Order {
     Side side;
     float price;
 };
+
+constexpr std::array<const char *, static_cast<std::size_t>(Order::Side::Count)> get_side_strings() {
+    return {"BUY", "SELL"};
+}
+
+constexpr std::array<const char *, static_cast<std::size_t>(Order::Type::Count)> get_type_strings() {
+    return {
+        "MARKET",
+        "STOP",
+        "LIMIT",
+    };
+}
+
+constexpr const char *order_side_to_string(Order::Side side) {
+    if (static_cast<size_t>(side) < static_cast<size_t>(Order::Side::Count)) {
+        return get_type_strings()[static_cast<size_t>(side)];
+    } else {
+        return "NONE";
+    }
+}
+
+constexpr const char *order_type_to_string(Order::Type type) {
+    if (static_cast<size_t>(type) < static_cast<size_t>(Order::Type::Count)) {
+        return get_type_strings()[static_cast<size_t>(type)];
+    } else {
+        return "NONE";
+    }
+}
+
 } // namespace back_trader
