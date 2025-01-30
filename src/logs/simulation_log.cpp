@@ -1,9 +1,5 @@
 #include "simulation_log.hpp"
-#include "common_interface/common.hpp"
-#include "common_util/Logger.hpp"
-#include "common_util/string_format_util.hpp"
-#include <array>
-#include <cstddef>
+#include <common_util.hpp>
 #include <variant>
 
 using namespace common_util;
@@ -31,11 +27,19 @@ std::string SimulationLogger::order_to_csv(const Order &order) const {
                          order.price);
 }
 
-std::string SimulationLogger::empty_order_csv(const Order &order) const { return ",,,,"; }
+std::string SimulationLogger::empty_order_csv() const { return ",,,,"; }
 
 // log current account and ohlc state
-void SimulationLogger::log_account_state(const OhlcTick &ohlc_tick, const Account &account) {}
+void SimulationLogger::log_account_state(const OhlcTick &ohlc_tick, const Account &account) {
+    logger->log(string_format(ohlc_to_csv(ohlc_tick), account_to_csv(account), empty_order_csv()),
+                Logger::Severity::INFO);
+}
 // log current account, ohlc and order after execution
-void SimulationLogger::log_account_state(const OhlcTick &ohlc_tick, const Account &account, const Order &order) {}
-void SimulationLogger::log_simulator_state(std::string_view simulator_state) {}
+void SimulationLogger::log_account_state(const OhlcTick &ohlc_tick, const Account &account, const Order &order) {
+    logger->log(string_format(ohlc_to_csv(ohlc_tick), account_to_csv(account), order_to_csv(order)),
+                Logger::Severity::INFO);
+}
+void SimulationLogger::log_simulator_state(std::string_view simulator_internal_state) {
+    logger->log(simulator_internal_state, Logger::Severity::INFO);
+}
 } // namespace back_trader
