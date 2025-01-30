@@ -371,5 +371,6 @@ bool Account::execute_order(const AccountConfig &account_config, const Order &or
     default:
         assert(false);
     }
+    return true;
 }
 } // namespace back_trader
