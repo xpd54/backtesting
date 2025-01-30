@@ -27,6 +27,8 @@ file(GLOB simulator_src
   "src/*.cpp"
   "src/simulators/**/*.cpp"
   "src/simulators/*.cpp"
+  "src/execution/*.cpp"
+  "src/logs/*.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${simulator_src} ${base_src})
