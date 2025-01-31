@@ -7,6 +7,6 @@ namespace back_trader {
 // 0.1 etc
 std::unique_ptr<SimulatorDispatcher> get_trade_simulator(std::string_view &strategy_name);
 
-// return simulator with all combinations of default config
+// return simulators with all combinations of default config
 std::vector<std::unique_ptr<SimulatorDispatcher>> get_combination_of_simulators(std::string_view &strategy_name);
 } // namespace back_trader
