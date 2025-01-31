@@ -12,7 +12,7 @@
 #define START_TIME "2011-09-14"
 #define END_TIME "2024-06-13"
 #define NOT_FOUND "NOT_FOUND"
-constexpr std::array<std::pair<std::string_view, std::string_view>, 15> args{
+constexpr std::array<std::pair<std::string_view, std::string_view>, 24> args{
     {{"input_price_history_csv_file", "input_price_history_csv_file"},
      {"input_price_history_binary_file", "input_price_history_binary_file"},
      {"output_price_history_binary_file", "output_price_history_binary_file"},
@@ -27,7 +27,16 @@ constexpr std::array<std::pair<std::string_view, std::string_view>, 15> args{
      {"interval_rate_sec", "interval_rate_sec"},
      {"top_n_gaps", "top_n_gaps"},
      {"last_n_outliers", "last_n_outliers"},
-     {"compress_in_byte", "compress_in_byte"}}};
+     {"compress_in_byte", "compress_in_byte"},
+     {"output_simulation_log_file", "output_evaluation_log_file"},
+     {"output_simulator_log_file", "output_simulator_log_file"},
+     {"simulator", "simulator"},
+     {"evaluation_period_months", "evaluation_period_months"},
+     {"start_base_balance", "start_base_balance"},
+     {"start_quote_balance", "start_quote_balance"},
+     {"market_liquidity", "market_liquidity"},
+     {"max_volume_ratio", "max_volume_ratio"},
+     {"evaluate_combination", "evaluate_combination"}}};
 
 constexpr std::string_view get_value(std::string_view key) {
     for (const auto &val : args) {
