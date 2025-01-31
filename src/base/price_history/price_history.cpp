@@ -73,9 +73,9 @@ std::vector<HistoryGap> get_price_history_gap(PriceHistory::const_iterator begin
     return std::vector<HistoryGap>(history_gaps_result.rbegin(), history_gaps_result.rend());
 }
 
-PriceHistory remove_outliers(PriceHistory::const_iterator begin, PriceHistory::const_iterator end,
-                             float max_price_deviation_per_min, std::vector<size_t> *outlier_indices) {
-    // TODO :- check for null outlier_indices and return stop with error
+PriceHistory clean_outliers(PriceHistory::const_iterator begin, PriceHistory::const_iterator end,
+                            float max_price_deviation_per_min, std::vector<size_t> *outlier_indexes) {
+    // TODO :- check for null outlier_indexes and return stop with error
     static constexpr int MAX_LOOKAHEAD = 10;
     static constexpr int MIN_LOOKAHEAD_PERSISTENT = 3;
     PriceHistory price_history_result;
@@ -84,7 +84,7 @@ PriceHistory remove_outliers(PriceHistory::const_iterator begin, PriceHistory::c
         const size_t price_record_index = std::distance(begin, it);
         // if price is less than or equal to 0 or volume was zero consider that as outlier and remove it from dataset
         if (price_record.price <= 0 || price_record.volume <= 0) {
-            outlier_indices->push_back(price_record_index);
+            outlier_indexes->push_back(price_record_index);
             continue;
         }
 
@@ -94,29 +94,29 @@ PriceHistory remove_outliers(PriceHistory::const_iterator begin, PriceHistory::c
             continue;
         }
 
-        /*Try to detect if price jump happen that's natural or outlier. we look head in data set (coming more price TPV)
-         * if this jump is valid with defined price deviation permin */
+        /*Try to detect if price change happen that's natural or outlier. we look head in data set (coming more price
+         * TPV) if this change is valid with defined price deviation permin */
         const PriceRecord &price_record_prev = price_history_result.back();
         const float reference_price = price_record_prev.price;
         const float duration_min =
             std::max(1.0f, static_cast<float>(price_record.timestamp_sec - price_record_prev.timestamp_sec) / 60.0f);
-        const float jump_factor = (1.0f + max_price_deviation_per_min) * std::sqrt(duration_min);
-        const float jump_up_price = reference_price * jump_factor;
-        const float jump_down_price = reference_price / jump_factor;
-        const bool jumped_up = price_record.price > jump_up_price;
-        const bool jumped_down = price_record.price < jump_down_price;
+        const float change_factor = (1.0f + max_price_deviation_per_min) * std::sqrt(duration_min);
+        const float change_up_price = reference_price * change_factor;
+        const float change_down_price = reference_price / change_factor;
+        const bool changed_up = price_record.price > change_up_price;
+        const bool changed_down = price_record.price < change_down_price;
         bool is_outlier = false;
-        if (jumped_up || jumped_down) {
-            // look ahead in data if price jump persist
+        if (changed_up || changed_down) {
+            // look ahead in data if price change persist
             int lookahead = 0;
             int lookahead_persistent = 0;
-            const float middle_up_price = 0.8f * jump_up_price + 0.2f * reference_price;
-            const float middle_down_price = 0.8f * jump_down_price + 0.2f * reference_price;
+            const float middle_up_price = 0.8f * change_up_price + 0.2f * reference_price;
+            const float middle_down_price = 0.8f * change_down_price + 0.2f * reference_price;
             for (auto jt = it + 1; jt != end && lookahead < MAX_LOOKAHEAD; ++jt) {
                 if (jt->price <= 0 || jt->volume < 0) {
                     continue;
                 }
-                if ((jumped_up && jt->price > middle_up_price) || (jumped_down && jt->price < middle_down_price)) {
+                if ((changed_up && jt->price > middle_up_price) || (changed_down && jt->price < middle_down_price)) {
                     ++lookahead_persistent;
                 }
                 ++lookahead;
@@ -125,22 +125,22 @@ PriceHistory remove_outliers(PriceHistory::const_iterator begin, PriceHistory::c
         }
         if (!is_outlier) {
             price_history_result.push_back(price_record);
-        } else if (outlier_indices != nullptr) {
-            outlier_indices->push_back(price_record_index);
+        } else if (outlier_indexes != nullptr) {
+            outlier_indexes->push_back(price_record_index);
         }
     }
     return price_history_result;
 }
 
-/*In outlier indices also get left and right context of indices. (mark them with false and later print that while
+/*In outlier indexes also get left and right context of indexes. (mark them with false and later print that while
  * looking ahead in PriceHistory)*/
-std::map<size_t, bool> get_outlier_indices_with_context(const std::vector<size_t> &outlier_indices,
+std::map<size_t, bool> get_outlier_indexes_with_context(const std::vector<size_t> &outlier_indexes,
                                                         size_t price_history_size, size_t left_context_size,
                                                         size_t right_context_size, size_t last_n) {
     std::map<size_t, bool> index_to_outlier;
-    const size_t start_i = (last_n == 0 || outlier_indices.size() <= last_n) ? 0 : outlier_indices.size() - last_n;
-    for (size_t i = start_i; i < outlier_indices.size(); ++i) {
-        const size_t j = outlier_indices[i];
+    const size_t start_i = (last_n == 0 || outlier_indexes.size() <= last_n) ? 0 : outlier_indexes.size() - last_n;
+    for (size_t i = start_i; i < outlier_indexes.size(); ++i) {
+        const size_t j = outlier_indexes[i];
         /*Get left and right context range and mark them false for outliers*/
         const size_t left = (j <= left_context_size) ? 0 : j - left_context_size;
         const size_t right = std::min(j + right_context_size + 1, price_history_size);
@@ -148,14 +148,15 @@ std::map<size_t, bool> get_outlier_indices_with_context(const std::vector<size_t
             // Keep the existing outliers.
             index_to_outlier[k] = false;
         }
-        // Keep the j (original outlier indices)
+        // Keep the j (original outlier indexes)
         index_to_outlier[j] = true;
     }
     return index_to_outlier;
 }
 
-OhlcHistory resample(PriceHistory::const_iterator begin, PriceHistory::const_iterator end, int sampling_rate_sec) {
-    OhlcHistory resampled_ohlc_history;
+OhlcHistory update_data_frequency(PriceHistory::const_iterator begin, PriceHistory::const_iterator end,
+                                  int interval_rate_sec) {
+    OhlcHistory altered_ohlc_history;
     for (auto it = begin; it != end; ++it) {
         /* Find which interval current time stamp belong.
          ex:- if sampling rate is 5 min or 300sec.
@@ -165,18 +166,18 @@ OhlcHistory resample(PriceHistory::const_iterator begin, PriceHistory::const_ite
            1400 =1400 - (1400 % 300) = 1200
            1580 =1580 - (1580 % 300) = 1500 <= in the next range
         */
-        const int64_t downsampled_timestamp_sec = it->timestamp_sec - (it->timestamp_sec % sampling_rate_sec);
+        const int64_t lower_frequency_timestamp_sec = it->timestamp_sec - (it->timestamp_sec % interval_rate_sec);
 
         /* if new price history comes up but previous history have gap (missing data) fill it with zero volume, with
          * previous OHLC. Before adding the new price history.*/
-        while (!resampled_ohlc_history.empty() &&
-               resampled_ohlc_history.back().timestamp_sec + sampling_rate_sec < downsampled_timestamp_sec) {
-            const int64_t prev_timestamp_sec = resampled_ohlc_history.back().timestamp_sec;
-            const float prev_close = resampled_ohlc_history.back().close;
-            resampled_ohlc_history.emplace_back();
-            OhlcTick *ohlc_tick = &resampled_ohlc_history.back();
+        while (!altered_ohlc_history.empty() &&
+               altered_ohlc_history.back().timestamp_sec + interval_rate_sec < lower_frequency_timestamp_sec) {
+            const int64_t prev_timestamp_sec = altered_ohlc_history.back().timestamp_sec;
+            const float prev_close = altered_ohlc_history.back().close;
+            altered_ohlc_history.emplace_back();
+            OhlcTick *ohlc_tick = &altered_ohlc_history.back();
 
-            ohlc_tick->timestamp_sec = prev_timestamp_sec + sampling_rate_sec;
+            ohlc_tick->timestamp_sec = prev_timestamp_sec + interval_rate_sec;
             ohlc_tick->open = prev_close;
             ohlc_tick->high = prev_close;
             ohlc_tick->low = prev_close;
@@ -185,19 +186,19 @@ OhlcHistory resample(PriceHistory::const_iterator begin, PriceHistory::const_ite
         }
 
         /*If last ohlc is in previous downsampled time range. Insert new entry, Else update the last entry*/
-        if (resampled_ohlc_history.empty() || resampled_ohlc_history.back().timestamp_sec < downsampled_timestamp_sec) {
-            resampled_ohlc_history.emplace_back();
-            OhlcTick *ohlc_tick = &resampled_ohlc_history.back();
+        if (altered_ohlc_history.empty() || altered_ohlc_history.back().timestamp_sec < lower_frequency_timestamp_sec) {
+            altered_ohlc_history.emplace_back();
+            OhlcTick *ohlc_tick = &altered_ohlc_history.back();
 
-            ohlc_tick->timestamp_sec = downsampled_timestamp_sec;
+            ohlc_tick->timestamp_sec = lower_frequency_timestamp_sec;
             ohlc_tick->open = it->price;
             ohlc_tick->high = it->price;
             ohlc_tick->low = it->price;
             ohlc_tick->close = it->price;
             ohlc_tick->volume = it->volume;
         } else {
-            assert(resampled_ohlc_history.back().timestamp_sec == downsampled_timestamp_sec);
-            OhlcTick *ohlc_tick = &resampled_ohlc_history.back();
+            assert(altered_ohlc_history.back().timestamp_sec == lower_frequency_timestamp_sec);
+            OhlcTick *ohlc_tick = &altered_ohlc_history.back();
 
             /// Hight would be max of price in that range
             ohlc_tick->high = std::max(ohlc_tick->high, it->price);
@@ -207,7 +208,7 @@ OhlcHistory resample(PriceHistory::const_iterator begin, PriceHistory::const_ite
             ohlc_tick->volume = ohlc_tick->volume + it->volume;
         }
     }
-    return resampled_ohlc_history;
+    return altered_ohlc_history;
 }
 
 } // namespace back_trader

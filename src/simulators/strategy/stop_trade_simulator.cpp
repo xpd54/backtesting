@@ -44,8 +44,8 @@ void StopTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vector<flo
 }
 
 void StopTradeSimulator::update_stop_order_price(Mode mode, int64_t timestamp_sec, float price) {
-    const float current_sampling_rate_sec = std::min(SecondsPerDay, timestamp_sec - _last_timestamp_sec);
-    const float ticks_per_day = SecondsPerDay / current_sampling_rate_sec;
+    const float current_interval_rate_sec = std::min(SecondsPerDay, timestamp_sec - _last_timestamp_sec);
+    const float ticks_per_day = SecondsPerDay / current_interval_rate_sec;
     if (mode == Mode::LONG) {
         const float stop_order_increase_threshold = (1 - _sim_config.stop_order_move_margin) * price;
         if (_stop_order_price <= stop_order_increase_threshold) {

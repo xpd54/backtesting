@@ -1,10 +1,6 @@
 #pragma once
 #include "../logs/simulation_log.hpp"
-#include "common_interface/common.hpp"
-#include "price_history/fear_and_greed.hpp"
-#include "price_history/history_subset.hpp"
 #include "simulation_types.hpp"
-#include "trade_simulator/trade_simulator.hpp"
 #include <base_header.hpp>
 
 namespace back_trader {
@@ -25,4 +21,5 @@ SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_
                                                    const FearAndGreed *fear_and_greed,              // nowrap
                                                    const SimulatorDispatcher &simulator_dispatcher, // nowrap
                                                    SimulationLogger *logger);
+std::vector<SimulatorEvaluationResult>
 } // namespace back_trader

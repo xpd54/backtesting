@@ -208,11 +208,11 @@ void print_price_history_gaps(const PriceHistory &price_history, size_t top_n) {
  Every outlier is surrounded by left_context_size of previous prices (if
  possible) and right_context_size of follow-up prices (if possible). */
 void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistory::const_iterator end,
-                                 const std::vector<size_t> &outlier_indices, size_t left_context_size,
+                                 const std::vector<size_t> &outlier_indexes, size_t left_context_size,
                                  size_t right_context_size, size_t last_n) {
     const size_t price_history_size = std::distance(begin, end);
-    std::map<size_t, bool> index_to_outlier = get_outlier_indices_with_context(
-        outlier_indices, price_history_size, left_context_size, right_context_size, last_n);
+    std::map<size_t, bool> index_to_outlier = get_outlier_indexes_with_context(
+        outlier_indexes, price_history_size, left_context_size, right_context_size, last_n);
 
     size_t index_prev = 0;
     for (const auto &index_outlier_pair : index_to_outlier) {
@@ -231,22 +231,22 @@ void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistor
     }
 }
 
-// Removes outliers and resamples the price history into OHLC history.
+// clean outliers and update frequency of the price history into OHLC history.
 // Keeping Max_price_deviation_fix
 OhlcHistory convert_price_history_to_ohlc_history(const PriceHistory &price_history,
-                                                  const int sampling_rate_sec = SAMPLING_RATE_SEC) {
-    std::vector<size_t> outlier_indices;
+                                                  const int interval_rate_sec = INTERVAL_RATE_SEC) {
+    std::vector<size_t> outlier_indexes;
 
     const PriceHistory price_history_clean =
-        remove_outliers(price_history.begin(), price_history.end(), MAX_PRICE_DEVIATION_PER_MIN, &outlier_indices);
+        clean_outliers(price_history.begin(), price_history.end(), MAX_PRICE_DEVIATION_PER_MIN, &outlier_indexes);
 
-    logInfo(string_format("Removed ", outlier_indices.size(), " outliers"));
+    logInfo(string_format("Removed ", outlier_indexes.size(), " outliers"));
     logInfo(string_format("Last ", LAST_N_OUTLIERS, " outliers:"));
-    print_outliers_with_context(price_history.begin(), price_history.end(), outlier_indices, 5, 5, LAST_N_OUTLIERS);
+    print_outliers_with_context(price_history.begin(), price_history.end(), outlier_indexes, 5, 5, LAST_N_OUTLIERS);
     const OhlcHistory ohlc_history =
-        resample(price_history_clean.begin(), price_history_clean.end(), sampling_rate_sec);
-    logInfo(
-        string_format("Resampled ", price_history_clean.size(), " records to ", ohlc_history.size(), " OHLC ticks"));
+        update_data_frequency(price_history_clean.begin(), price_history_clean.end(), interval_rate_sec);
+    logInfo(string_format("Updated Frequency of ", price_history_clean.size(), " records to ", ohlc_history.size(),
+                          " OHLC ticks"));
     return ohlc_history;
 }
 
@@ -279,8 +279,8 @@ int main(int argc, char *argv[]) {
     double max_price_deviation_per_min = arg_map["max_price_deviation_per_min"] == ""
                                              ? MAX_PRICE_DEVIATION_PER_MIN
                                              : std::stod(arg_map["max_price_deviation_per_min"]);
-    int sampling_rate_sec =
-        arg_map["sampling_rate_sec"] == "" ? SAMPLING_RATE_SEC : std::stoi(arg_map["sampling_rate_sec"]);
+    int interval_rate_sec =
+        arg_map["interval_rate_sec"] == "" ? interval_rate_sec : std::stoi(arg_map["interval_rate_sec"]);
     int top_n_gaps = arg_map["top_n_gaps"] == "" ? TOP_N_GAPS : std::stoi(arg_map["top_n_gaps"]);
     int last_n_outliers = arg_map["last_n_outliers"] == "" ? LAST_N_OUTLIERS : std::stoi(arg_map["last_n_outliers"]);
     bool compress_in_byte =
@@ -351,7 +351,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (!price_history.empty() && ohlc_history.empty() && !output_ohlc_history_binary_file.empty()) {
-        ohlc_history = convert_price_history_to_ohlc_history(price_history, sampling_rate_sec);
+        ohlc_history = convert_price_history_to_ohlc_history(price_history, interval_rate_sec);
     }
 
     if (!price_history.empty() && !output_price_history_binary_file.empty())

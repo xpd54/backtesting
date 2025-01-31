@@ -18,7 +18,7 @@ Convert TPV to OHLC with 5 min sampling rate
 --output_ohlc_history_binary_file="../data/bitstampUSD_5min.mov" \
 --start_time="2017-01-01" \
 --end_time="2022-01-01" \
---sampling_rate_sec=300
+--interval_rate_sec=300
 ```
 
 Convert TPV to OHLC with 1h sampling rate
@@ -29,5 +29,5 @@ Convert TPV to OHLC with 1h sampling rate
 --output_ohlc_history_binary_file="../data/bitstampUSD_1h.mov" \
 --start_time="2017-01-01" \
 --end_time="2022-01-01" \
---sampling_rate_sec=3600
+--interval_rate_sec=3600
 ```

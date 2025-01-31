@@ -4,7 +4,7 @@
 #include <string_view>
 
 #define MAX_PRICE_DEVIATION_PER_MIN 0.05
-#define SAMPLING_RATE_SEC 300
+#define INTERVAL_RATE_SEC 300
 #define TOP_N_GAPS 50
 #define LAST_N_OUTLIERS 20
 #define COMPRESS_IN_BYTE true
@@ -24,7 +24,7 @@ constexpr std::array<std::pair<std::string_view, std::string_view>, 15> args{
      {"start_time", "start_time"},
      {"end_time", "end_time"},
      {"max_price_deviation_per_min", "max_price_deviation_per_min"},
-     {"sampling_rate_sec", "sampling_rate_sec"},
+     {"interval_rate_sec", "interval_rate_sec"},
      {"top_n_gaps", "top_n_gaps"},
      {"last_n_outliers", "last_n_outliers"},
      {"compress_in_byte", "compress_in_byte"}}};

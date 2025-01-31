@@ -1,6 +1,6 @@
 #pragma once
 #include "price_history/history_subset.hpp"
-
+// TODO :- get fear and greed indexes from https://alternative.me/crypto/fear-and-greed-index/
 namespace back_trader {
 class FearAndGreed {
   public:
