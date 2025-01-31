@@ -19,11 +19,11 @@ SimulationResult execute_trade_simulation(const AccountConfig &account_config,  
 /*
  * Evalulate single simulator
  */
-SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_config,             // nowrap
-                                                   const SimEvaluationConfig &sim_eval_config,      // nowrap
-                                                   const OhlcHistory &ohlc_tick,                    // nowrap
-                                                   const FearAndGreed *fear_and_greed_input,        // nowrap
-                                                   const SimulatorDispatcher &simulator_dispatcher, // nowrap
+SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_config,              // nowrap
+                                                   const SimEvaluationConfig &sim_evaluation_config, // nowrap
+                                                   const OhlcHistory &ohlc_histroy,                  // nowrap
+                                                   const FearAndGreed *fear_and_greed_input,         // nowrap
+                                                   const SimulatorDispatcher &simulator_dispatcher,  // nowrap
                                                    SimulationLogger *logger);
 
 /*
@@ -33,8 +33,8 @@ SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_
  */
 std::vector<SimulatorEvaluationResult>
 evaluate_combination_of_trade_simulators(const AccountConfig &account_config,
-                                         const SimEvaluationConfig &sim_eval_config, // nowrap
-                                         const OhlcHistory &ohlc_history,            // nowrap
+                                         const SimEvaluationConfig &sim_evaluation_config, // nowrap
+                                         const OhlcHistory &ohlc_history,                  // nowrap
                                          const FearAndGreed *fear_and_greed_input,
                                          const std::vector<std::unique_ptr<SimulatorDispatcher>> &simulator_dispatcher);
 } // namespace back_trader

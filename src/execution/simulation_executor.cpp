@@ -1,9 +1,13 @@
 #include "simulation_executor.hpp"
 #include "../util/maths_util.hpp"
-#include "common_interface/common.hpp"
+#include "common_util/time_util.hpp"
+#include "price_history/history_subset.hpp"
 #include "simulation_types.hpp"
+#include "trade_simulator/trade_simulator.hpp"
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
+#include <memory>
 
 namespace back_trader {
 SimulationResult execute_trade_simulation(const AccountConfig &account_config,      // nowrap
@@ -83,4 +87,74 @@ SimulationResult execute_trade_simulation(const AccountConfig &account_config,  
     }
     return simulation_result;
 }
+
+SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_config,              // nowrap
+                                                   const SimEvaluationConfig &sim_evaluation_config, // nowrap
+                                                   const OhlcHistory &ohlc_histroy,                  // nowrap
+                                                   const FearAndGreed *fear_and_greed_input,         // nowrap
+                                                   const SimulatorDispatcher &simulator_dispatcher,  // nowrap
+                                                   SimulationLogger *logger) {
+    SimulatorEvaluationResult simulation_eval_result;
+    simulation_eval_result.account_config = account_config;
+    simulation_eval_result.sim_evaluation_config = sim_evaluation_config;
+    simulation_eval_result.name = simulator_dispatcher.get_names();
+    for (int month_offset = 0;; ++month_offset) {
+        const int64_t start_evalueation_timestamp_sec =
+            add_months(sim_evaluation_config.start_timestamp_sec, month_offset);
+
+        const int64_t end_evaluation_timestamp_sec =
+            sim_evaluation_config.evaluation_period_months > 0
+                ? add_months(start_evalueation_timestamp_sec, sim_evaluation_config.evaluation_period_months)
+                : sim_evaluation_config.end_timestamp_sec;
+        if (end_evaluation_timestamp_sec > sim_evaluation_config.end_timestamp_sec) {
+            break;
+        }
+
+        // Get pair of iterator which denote start and end of time stamp
+        auto ohlc_history_subset =
+            history_subset(ohlc_histroy, start_evalueation_timestamp_sec, end_evaluation_timestamp_sec);
+        // skip no data found
+        if (ohlc_history_subset.first == ohlc_history_subset.second)
+            continue;
+        std::unique_ptr<TradeSimulator> trade_simulator = simulator_dispatcher.new_simulator();
+        SimulationResult sim_result = execute_trade_simulation(
+            account_config, ohlc_history_subset.first, ohlc_history_subset.second, {}, false, *trade_simulator, logger);
+        simulation_eval_result.periods.emplace_back();
+        SimulatorEvaluationResult::TimePeriod *time_period = &simulation_eval_result.periods.back();
+        time_period->start_timestamp_sec = start_evalueation_timestamp_sec;
+        time_period->end_timestamp_sec = end_evaluation_timestamp_sec;
+        time_period->result = sim_result;
+        assert(sim_result.start_value > 0);
+        time_period->final_gain = (sim_result.end_value / sim_result.start_value);
+        assert(sim_result.start_price > 0 && sim_result.end_price > 0);
+        // gain for buy and hold
+        time_period->base_final_gain = (sim_result.end_price / sim_result.start_price);
+        if (sim_evaluation_config.evaluation_period_months == 0) {
+            break;
+        }
+    }
+
+    simulation_eval_result.score = get_geometric_avrage_of_container(
+        simulation_eval_result.periods,
+        [](const SimulatorEvaluationResult::TimePeriod &period) { return period.final_gain / period.base_final_gain; });
+
+    simulation_eval_result.avg_gain =
+        get_avrage_of_container(simulation_eval_result.periods,
+                                [](const SimulatorEvaluationResult::TimePeriod &period) { return period.final_gain; });
+
+    simulation_eval_result.avg_base_gain = get_avrage_of_container(
+        simulation_eval_result.periods,
+        [](const SimulatorEvaluationResult::TimePeriod &period) { return period.base_final_gain; });
+
+    simulation_eval_result.avg_total_executed_orders = get_avrage_of_container(
+        simulation_eval_result.periods,
+        [](const SimulatorEvaluationResult::TimePeriod &period) { return period.result.total_order; });
+
+    simulation_eval_result.avg_total_fee =
+        get_avrage_of_container(simulation_eval_result, [](const SimulatorEvaluationResult::TimePeriod &period) {
+            return period.result.total_fee;
+        });
+    return simulation_eval_result;
+}
+
 } // namespace back_trader

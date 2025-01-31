@@ -37,7 +37,7 @@ struct SimEvaluationConfig {
     // Ending timestamp (in sec).
     int64_t end_timestamp_sec;
     // execution period (in months).
-    int32_t execution_period_months;
+    int32_t evaluation_period_months;
     // When true, avoids computing volatility (to speed up the computation).
     // This is useful when evaluating a combination of traders in parallel.
     bool fast_execute;
@@ -46,7 +46,7 @@ struct SimEvaluationConfig {
 // Result of trade simulation over given execution config.
 struct SimulatorEvaluationResult {
     AccountConfig account_config;
-    SimEvaluationConfig execute_config;
+    SimEvaluationConfig sim_evaluation_config;
     // strategy_name.
     std::string name;
     // execution over a specific period.
@@ -61,7 +61,7 @@ struct SimulatorEvaluationResult {
         // percent gain of the baseline (Buy and HODL) method.
         float base_final_gain;
     };
-    TimePeriod period;
+    std::vector<TimePeriod> periods;
     float score;
     // percent gain of the trade (after fees).
     float avg_gain;
