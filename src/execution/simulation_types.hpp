@@ -27,6 +27,7 @@ struct SimulationResult {
     float total_fee;
 
     // TODO :- Implement market volatility indicator
+    // https://docs.google.com/spreadsheets/d/1lQTz1Fad2TIi42-jBjwd-42UWKsIuSP1/
     float base_volatility;
     float simulator_volatility;
 };

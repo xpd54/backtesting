@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <future>
 #include <memory>
 
 namespace back_trader {
@@ -21,7 +22,6 @@ SimulationResult execute_trade_simulation(const AccountConfig &account_config,  
     // No data to process
     if (ohlc_begin == ohlc_end)
         return {};
-    assert(logger != nullptr);
 
     // Every simulator (strategy) would have it's own account to track the transaction
     Account account;
@@ -35,7 +35,8 @@ SimulationResult execute_trade_simulation(const AccountConfig &account_config,  
         const OhlcTick &ohlc_tick = *ohlc_it;
 
         // Log current ohlc and account
-        logger->log_account_state(ohlc_tick, account);
+        if (logger)
+            logger->log_account_state(ohlc_tick, account);
 
         /*
          *  The trade simulator was updated on the previous OHLC tick OHLC_HISTORY[i-1] and emitted
@@ -62,7 +63,8 @@ SimulationResult execute_trade_simulation(const AccountConfig &account_config,  
         // as we have already executed previous tick order let update for current ohlc tick
         orders.clear();
         trade_simulator.update(ohlc_tick, {}, account.base_balance, account.quote_balance, orders);
-        logger->log_simulator_state(trade_simulator.get_internal_state());
+        if (logger)
+            logger->log_simulator_state(trade_simulator.get_internal_state());
 
         // TODO :- handle calculation of volatility according to fast_execute
 
@@ -150,11 +152,38 @@ SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_
         simulation_eval_result.periods,
         [](const SimulatorEvaluationResult::TimePeriod &period) { return period.result.total_order; });
 
-    simulation_eval_result.avg_total_fee =
-        get_avrage_of_container(simulation_eval_result, [](const SimulatorEvaluationResult::TimePeriod &period) {
-            return period.result.total_fee;
-        });
+    simulation_eval_result.avg_total_fee = get_avrage_of_container(
+        simulation_eval_result.periods,
+        [](const SimulatorEvaluationResult::TimePeriod &period) { return period.result.total_fee; });
     return simulation_eval_result;
+}
+
+std::vector<SimulatorEvaluationResult> evaluate_combination_of_trade_simulators(
+    const AccountConfig &account_config,
+    const SimEvaluationConfig &sim_evaluation_config, // nowrap
+    const OhlcHistory &ohlc_history,                  // nowrap
+    const FearAndGreed *fear_and_greed_input,
+    const std::vector<std::unique_ptr<SimulatorDispatcher>> &simulator_dispatchers) {
+    std::vector<SimulatorEvaluationResult> sim_evaluation_results;
+
+    /*
+     * Use future for multi threading
+     * TODO :- convert this to std::thread and Pass down a parameter from command line argument for number of thread to
+     * be used.
+     */
+    std::vector<std::future<SimulatorEvaluationResult>> sim_evaluation_result_futures;
+    for (const auto &sim_dispatcher : simulator_dispatchers) {
+        const SimulatorDispatcher &simulator_dispatcher = *sim_dispatcher;
+        sim_evaluation_result_futures.emplace_back(std::async([&]() {
+            return evaluate_trade_simulator(account_config, sim_evaluation_config, ohlc_history, {},
+                                            simulator_dispatcher,
+                                            /*logger=*/nullptr);
+        }));
+    }
+    for (auto &eval_result_future : sim_evaluation_result_futures) {
+        sim_evaluation_results.emplace_back(eval_result_future.get());
+    }
+    return sim_evaluation_results;
 }
 
 } // namespace back_trader

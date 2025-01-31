@@ -24,7 +24,7 @@ template <typename T>
 std::pair<typename std::vector<T>::const_iterator, typename std::vector<T>::const_iterator>
 history_subset(const std::vector<T> &history, int64_t start_timestamp_sec, int64_t end_timestamp_sec) {
     const auto record_compare = [](const T &record, int64_t timestamp_sec) {
-        return record.timestamp_sec() < timestamp_sec;
+        return record.timestamp_sec < timestamp_sec;
     };
     const auto record_begin =
         start_timestamp_sec > 0 ? std::lower_bound(history.begin(), history.end(), start_timestamp_sec, record_compare)

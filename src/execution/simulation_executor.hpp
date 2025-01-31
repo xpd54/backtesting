@@ -31,10 +31,10 @@ SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_
  * config ex:- alpha and epsilon to generate list of
  * simulators) of simulatators no multi threads;
  */
-std::vector<SimulatorEvaluationResult>
-evaluate_combination_of_trade_simulators(const AccountConfig &account_config,
-                                         const SimEvaluationConfig &sim_evaluation_config, // nowrap
-                                         const OhlcHistory &ohlc_history,                  // nowrap
-                                         const FearAndGreed *fear_and_greed_input,
-                                         const std::vector<std::unique_ptr<SimulatorDispatcher>> &simulator_dispatcher);
+std::vector<SimulatorEvaluationResult> evaluate_combination_of_trade_simulators(
+    const AccountConfig &account_config,
+    const SimEvaluationConfig &sim_evaluation_config, // nowrap
+    const OhlcHistory &ohlc_history,                  // nowrap
+    const FearAndGreed *fear_and_greed_input,
+    const std::vector<std::unique_ptr<SimulatorDispatcher>> &simulator_dispatchers);
 } // namespace back_trader
