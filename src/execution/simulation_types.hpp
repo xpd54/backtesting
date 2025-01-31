@@ -25,6 +25,8 @@ struct SimulationResult {
     int32_t total_order;
     // total fee in quote currecy
     float total_fee;
+
+    // TODO :- Implement market volatility indicator
     float base_volatility;
     float trader_volatility;
 };
