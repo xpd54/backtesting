@@ -1,10 +1,7 @@
 #include "simulation_executor.hpp"
-#include "../util/maths_util.hpp"
-#include "common_util/time_util.hpp"
-#include "price_history/history_subset.hpp"
 #include "simulation_types.hpp"
-#include "trade_simulator/trade_simulator.hpp"
 #include <cassert>
+#include <common_util.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <future>

@@ -11,7 +11,7 @@
 // available data full range
 #define START_TIME "2011-09-14"
 #define END_TIME "2024-06-13"
-#define NONE "NONE"
+#define NOT_FOUND "NOT_FOUND"
 constexpr std::array<std::pair<std::string_view, std::string_view>, 15> args{
     {{"input_price_history_csv_file", "input_price_history_csv_file"},
      {"input_price_history_binary_file", "input_price_history_binary_file"},
@@ -35,7 +35,7 @@ constexpr std::string_view get_value(std::string_view key) {
             return val.second;
         }
     }
-    return "NONE";
+    return "NOT_FOUND";
 }
 
-constexpr bool arg_valid(std::string_view key) { return get_value(key) != NONE; }
+constexpr bool arg_valid(std::string_view key) { return get_value(key) != NOT_FOUND; }
