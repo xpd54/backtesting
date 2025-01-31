@@ -5,6 +5,7 @@
 #include "price_history/history_subset.hpp"
 #include "price_history/price_history.hpp"
 #include "trade_simulator/trade_simulator.hpp"
+#include "util/binary_io/binary_read_write.hpp"
 #include "util/cmd_line_args.hpp"
 #include "util/maths_util.hpp"
 #include "util/quick_log.hpp"

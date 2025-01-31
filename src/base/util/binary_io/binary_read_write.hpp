@@ -1,5 +1,5 @@
 #pragma once
-#include <base_header.hpp>
+#include "../quick_log.hpp"
 #include <common_util.hpp>
 #include <vector>
 using namespace common_util;

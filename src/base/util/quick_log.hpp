@@ -1,5 +1,4 @@
 #pragma once
-#include "common_util/Logger.hpp"
 #include <common_util.hpp>
 using namespace common_util;
 namespace back_trader {
