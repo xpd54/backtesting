@@ -99,7 +99,7 @@ std::unique_ptr<TradeSimulator> StopTradeSimulatorDispatcher::new_simulator() co
 }
 
 // get simulator with all combination of parameters
-std::vector<std::unique_ptr<SimulatorDispatcher>> StopTradeSimulatorDispatcher::get_batch_of_simulator(
+std::vector<std::unique_ptr<SimulatorDispatcher>> StopTradeSimulatorDispatcher::get_combination_of_simulator(
     const std::vector<float> &stop_order_margins, const std::vector<float> &stop_order_move_margins,
     const std::vector<float> &stop_order_increases_per_day, const std::vector<float> &stop_order_decreases_per_day) {
     std::vector<std::unique_ptr<SimulatorDispatcher>> dispatchers;

@@ -109,8 +109,8 @@ std::unique_ptr<TradeSimulator> RebalancingSimulatorDispatcher::new_simulator() 
 }
 
 std::vector<std::unique_ptr<SimulatorDispatcher>>
-RebalancingSimulatorDispatcher::get_batch_of_simulator(const std::vector<float> &alphas,
-                                                       const std::vector<float> &epsilons) {
+RebalancingSimulatorDispatcher::get_combination_of_simulator(const std::vector<float> &alphas,
+                                                             const std::vector<float> &epsilons) {
     std::vector<std::unique_ptr<SimulatorDispatcher>> dispatchers;
 
     dispatchers.reserve(alphas.size() * epsilons.size());

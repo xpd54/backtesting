@@ -36,8 +36,8 @@ class RebalancingSimulatorDispatcher : public SimulatorDispatcher {
     std::unique_ptr<TradeSimulator> new_simulator() const override;
 
     // Take list of alphas and epsilons and return simulaterdispatcher with all combinations of alphas and epsilons
-    static std::vector<std::unique_ptr<SimulatorDispatcher>> get_batch_of_simulator(const std::vector<float> &alphas,
-                                                                                    const std::vector<float> &epsilons);
+    static std::vector<std::unique_ptr<SimulatorDispatcher>>
+    get_combination_of_simulator(const std::vector<float> &alphas, const std::vector<float> &epsilons);
 
   private:
     RebalancingTradeSimulatorConfig config;

@@ -46,7 +46,7 @@ class StopTradeSimulatorDispatcher : public SimulatorDispatcher {
     std::string get_names() const override;
     std::unique_ptr<TradeSimulator> new_simulator() const override;
 
-    static std::vector<std::unique_ptr<SimulatorDispatcher>> get_batch_of_simulator(
+    static std::vector<std::unique_ptr<SimulatorDispatcher>> get_combination_of_simulator(
         const std::vector<float> &stop_order_margins, const std::vector<float> &stop_order_move_margins,
         const std::vector<float> &stop_order_increases_per_day, const std::vector<float> &stop_order_decreases_per_day);
 

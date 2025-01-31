@@ -31,7 +31,7 @@ struct SimulationResult {
     float trader_volatility;
 };
 
-struct ExecutionConfig {
+struct SimEvaluationConfig {
     // Start timestamp (in sec).
     int64_t start_timestamp_sec;
     // Ending timestamp (in sec).
@@ -39,14 +39,14 @@ struct ExecutionConfig {
     // execution period (in months).
     int32_t execution_period_months;
     // When true, avoids computing volatility (to speed up the computation).
-    // This is useful when evaluating a batch of traders in parallel.
+    // This is useful when evaluating a combination of traders in parallel.
     bool fast_execute;
 };
 
 // Result of trade simulation over given execution config.
-struct SimulatorExecutionResult {
+struct SimulatorEvaluationResult {
     AccountConfig account_config;
-    ExecutionConfig execute_config;
+    SimEvaluationConfig execute_config;
     // strategy_name.
     std::string name;
     // execution over a specific period.
