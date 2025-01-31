@@ -33,6 +33,8 @@ Their behavior and performance should remain consistent regardless of how often 
 exchanges (or their APIs) can become unresponsive for random periods, resulting in gaps in price histories. Therefore,
 it is encouraged to test the TradeSimulator on OHLC histories with varying sampling rates and gaps.
  */
+
+// TODO use CRTP to remove virtual methods
 class TradeSimulator {
   public:
     TradeSimulator(){};
