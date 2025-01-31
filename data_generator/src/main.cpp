@@ -273,8 +273,8 @@ int main(int argc, char *argv[]) {
     std::string input_ohlc_history_binary_file = arg_map["input_ohlc_history_binary_file"];
     std::string output_ohlc_history_binary_file = arg_map["output_ohlc_history_binary_file"];
 
-    std::string input_side_history_csv_file = arg_map["input_side_history_csv_file"];
-    std::string output_side_history_binary_file = arg_map["output_side_history_binary_file"];
+    std::string input_fear_and_greed_history_csv_file = arg_map["input_fear_and_greed_history_csv_file"];
+    std::string output_fear_and_greed_history_binary_file = arg_map["output_fear_and_greed_history_binary_file"];
 
     double max_price_deviation_per_min = arg_map["max_price_deviation_per_min"] == ""
                                              ? MAX_PRICE_DEVIATION_PER_MIN
@@ -307,12 +307,12 @@ int main(int argc, char *argv[]) {
 
     const bool read_price_history = !input_price_history_csv_file.empty() || !input_price_history_binary_file.empty();
     const bool read_ohlc_history = !input_ohlc_history_csv_file.empty() || !input_ohlc_history_binary_file.empty();
-    const bool read_side_history = !input_side_history_csv_file.empty();
+    const bool read_fear_and_greed_history = !input_fear_and_greed_history_csv_file.empty();
 
     const int num_history_files =
-        (read_price_history ? 1 : 0) + (read_ohlc_history ? 1 : 0) + (read_side_history ? 1 : 0);
+        (read_price_history ? 1 : 0) + (read_ohlc_history ? 1 : 0) + (read_fear_and_greed_history ? 1 : 0);
 
-    // we would ignore side_history (fear & greed) for now
+    // we would ignore fear_and_greed_history (fear & greed) for now
     if (num_history_files > 1) {
         logger.log("Cannot read more than one input history file", Logger::Severity::ERROR);
         std::exit(EXIT_FAILURE);

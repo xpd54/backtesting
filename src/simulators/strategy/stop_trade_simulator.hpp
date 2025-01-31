@@ -6,7 +6,7 @@ class StopTradeSimulator : public TradeSimulator {
   public:
     explicit StopTradeSimulator(const StopTradeSimulatorConfig &config) : _sim_config(config) {}
     virtual ~StopTradeSimulator() {}
-    void update(const OhlcTick &ohlc_tick, const std::vector<float> &side_input_signals, float base_balance,
+    void update(const OhlcTick &ohlc_tick, const std::vector<float> &fear_and_greed_input_signals, float base_balance,
                 float quote_balance, std::vector<Order> &orders) override;
     std::string get_internal_state() const override;
 

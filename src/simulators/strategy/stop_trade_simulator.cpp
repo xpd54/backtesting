@@ -10,8 +10,8 @@
 using namespace common_util;
 namespace back_trader {
 
-// TODO :- Side input signal handling (fear & greed)
-void StopTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vector<float> &side_input_signals,
+// TODO :- fear_and_greed_input_signals signal handling (https://alternative.me/crypto/fear-and-greed-index/)
+void StopTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vector<float> &fear_and_greed_input_signals,
                                 float base_balance, float quote_balance, std::vector<Order> &orders) {
     const int64_t timestamp_sec = ohlc_tick.timestamp_sec;
     const float price = ohlc_tick.close;

@@ -8,9 +8,10 @@
 
 using namespace common_util;
 namespace back_trader {
-// keep side input (fear & greed index for future dev)
-void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vector<float> &side_input_signals,
-                                       float base_balance, float quote_balance, std::vector<Order> &orders) {
+// keep fear_and_greed_input (fear & greed index for future dev)
+void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick,
+                                       const std::vector<float> &fear_and_greed_input_signals, float base_balance,
+                                       float quote_balance, std::vector<Order> &orders) {
     const int64_t timestamp_sec = ohlc_tick.timestamp_sec;
     const float price = ohlc_tick.close;
     // we are getting next ohlc

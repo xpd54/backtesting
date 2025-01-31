@@ -8,7 +8,7 @@ namespace back_trader {
 
 The TradeSimulator operates in following way:
 
-- At every step, the simulator receives the latest OHLC tick (T[i]), along with any additional side input signals
+- At every step, the simulator receives the latest OHLC tick (T[i]), along with any additional fear and greed signals
 (which is empty as haven't consider for this phase), and the current account balances. Based on this information, the
 simulator updates its internal state and data structures. The current time of the simulator is at the end of the OHLC
 tick (T[i]). The simulator does not receive zero-volume OHLC ticks, as these indicate a gap in the price
@@ -19,7 +19,7 @@ orders on the exchange.
 
 - Once the simulator determines the orders to emit, the exchange will execute (or cancel) all these orders on the
 follow-up OHLC tick (T[i+1]). The simulator does not have visibility into the follow-up OHLC tick (T[i+1]) (nor
-any subsequent side input), ensuring that it cannot peek into the future.
+any subsequent fear and greed), ensuring that it cannot peek into the future.
 
 - After all orders are executed (or canceled) by the exchange, the simulator receives the follow-up OHLC tick (T[i+1])
 
@@ -45,8 +45,11 @@ class TradeSimulator {
       called. The emitted orders will be either executed or cancelled by the
       exchange at the next OHLC tick.
     */
-    virtual void update(const OhlcTick &ohlc_tick, const std::vector<float> &side_input_signals, float base_balance,
-                        float quote_balance, std::vector<Order> &orders) = 0;
+    virtual void update(const OhlcTick &ohlc_tick,                              // nowrap
+                        const std::vector<float> &fear_and_greed_input_signals, // nowrap
+                        float base_balance,                                     // nowrap
+                        float quote_balance,                                    // nowrap
+                        std::vector<Order> &orders) = 0;
     // Returns the internal TradeSimulator state (as a string).
     virtual std::string get_internal_state() const = 0;
 };

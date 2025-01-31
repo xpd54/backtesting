@@ -28,7 +28,7 @@ struct SimulationResult {
 
     // TODO :- Implement market volatility indicator
     float base_volatility;
-    float trader_volatility;
+    float simulator_volatility;
 };
 
 struct SimEvaluationConfig {
