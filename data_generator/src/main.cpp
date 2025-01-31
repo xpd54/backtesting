@@ -258,6 +258,7 @@ int main(int argc, char *argv[]) {
     logger.init("log_file.log", Logger::Severity::DEBUG, Logger::OutputMode::CONSOLE);
     logger.open();
     /*validate arguments*/
+    // TODO :- use std::varient to hold argument value or default error code.
     std::unordered_map<std::string, std::string> arg_map = get_command_line_argument(argc, argv);
     for (auto &val : arg_map) {
         if (!arg_valid(val.first)) {
