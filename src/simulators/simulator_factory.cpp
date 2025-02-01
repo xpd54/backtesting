@@ -35,7 +35,7 @@ std::vector<std::unique_ptr<SimulatorDispatcher>> get_combination_of_stop_trade_
 
 /* Update with other strategy if get added, If name of strategy not found end it*/
 
-std::unique_ptr<SimulatorDispatcher> get_trade_simulator(std::string_view &strategy_name) {
+std::unique_ptr<SimulatorDispatcher> get_trade_simulator(std::string_view strategy_name) {
     if (strategy_name == RebalancingTradeSimulatorName) {
         return get_default_rebalancing_simulator_dispatcher();
     } else if (strategy_name == StopTradeSimulatorName) {
@@ -44,7 +44,7 @@ std::unique_ptr<SimulatorDispatcher> get_trade_simulator(std::string_view &strat
         std::exit(EXIT_FAILURE);
     }
 }
-std::vector<std::unique_ptr<SimulatorDispatcher>> get_combination_of_simulators(std::string_view &strategy_name) {
+std::vector<std::unique_ptr<SimulatorDispatcher>> get_combination_of_simulators(std::string_view strategy_name) {
     if (strategy_name == RebalancingTradeSimulatorName) {
         return get_combination_of_rebalancing_trade_simulators();
     } else if (strategy_name == StopTradeSimulatorName) {

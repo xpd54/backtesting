@@ -8,6 +8,7 @@
 #define TOP_N_GAPS 50
 #define LAST_N_OUTLIERS 20
 #define COMPRESS_IN_BYTE true
+#define EVALUATE_COMBINATION false
 // available data full range
 #define START_TIME "2011-09-14"
 #define END_TIME "2024-06-13"
@@ -28,7 +29,7 @@ constexpr std::array<std::pair<std::string_view, std::string_view>, 24> args{
      {"top_n_gaps", "top_n_gaps"},
      {"last_n_outliers", "last_n_outliers"},
      {"compress_in_byte", "compress_in_byte"},
-     {"output_simulation_log_file", "output_evaluation_log_file"},
+     {"output_account_log_file", "output_account_log_file"},
      {"output_simulator_log_file", "output_simulator_log_file"},
      {"simulator", "simulator"},
      {"evaluation_period_months", "evaluation_period_months"},
