@@ -73,7 +73,7 @@ SimulationResult execute_trade_simulation(const AccountConfig &account_config,  
         simulation_result.end_quote_balance = account.quote_balance;
         simulation_result.start_price = ohlc_begin->close;
         // end iterator are 1 pass end
-        simulation_result.end_price = (--ohlc_end)->close;
+        simulation_result.end_price = (ohlc_end - 1)->close;
         simulation_result.start_value = simulation_result.start_quote_balance +
                                         simulation_result.start_price * simulation_result.start_base_balance;
 
@@ -102,7 +102,6 @@ SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_
     for (int month_offset = 0;; ++month_offset) {
         const int64_t start_evalueation_timestamp_sec =
             add_months(sim_evaluation_config.start_timestamp_sec, month_offset);
-
         const int64_t end_evaluation_timestamp_sec =
             sim_evaluation_config.evaluation_period_months > 0
                 ? add_months(start_evalueation_timestamp_sec, sim_evaluation_config.evaluation_period_months)
@@ -118,8 +117,12 @@ SimulatorEvaluationResult evaluate_trade_simulator(const AccountConfig &account_
         if (ohlc_history_subset.first == ohlc_history_subset.second)
             continue;
         std::unique_ptr<TradeSimulator> trade_simulator = simulator_dispatcher.new_simulator();
-        SimulationResult sim_result = execute_trade_simulation(
-            account_config, ohlc_history_subset.first, ohlc_history_subset.second, {}, false, *trade_simulator, logger);
+        SimulationResult sim_result = execute_trade_simulation(account_config,             // nowrap
+                                                               ohlc_history_subset.first,  // nowrap
+                                                               ohlc_history_subset.second, // nowrap
+                                                               {}, false,                  // nowrap
+                                                               *trade_simulator,           // nowrap
+                                                               logger);
         simulation_eval_result.periods.emplace_back();
         SimulatorEvaluationResult::TimePeriod *time_period = &simulation_eval_result.periods.back();
         time_period->start_timestamp_sec = start_evalueation_timestamp_sec;

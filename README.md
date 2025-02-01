@@ -31,3 +31,14 @@ Convert TPV to OHLC with 1h sampling rate
 --end_time="2022-01-01" \
 --interval_rate_sec=3600
 ```
+
+```
+./trade_simulator \
+--input_price_history_binary_file="../data/bitstampUSD_5min.mov" \
+--output_account_log_file="../data/hello_account.log" \
+--output_simulator_log_file="../data/hello_sim.log" \
+--start_time="2017-01-01" \
+--end_time="2022-01-01" \
+--start_base_balance=1.0 \
+--start_quote_balance=0.0
+```

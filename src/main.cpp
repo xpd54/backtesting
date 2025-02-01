@@ -57,14 +57,14 @@ void print_combination_of_trade_evaluation_results(const std::vector<SimulatorEv
 }
 
 void print_trade_simulator_evaluation_result(const SimulatorEvaluationResult &sim_evaluation_result) {
-    logInfo(string_format("-------------- Time Period --------------  Trader & Base gain score volatility"));
+    logInfo(string_format("-------------- Time Period --------------  Strategy gain | Base gain | Score | volatility"));
     for (const SimulatorEvaluationResult::TimePeriod &period : sim_evaluation_result.periods) {
         logInfo(string_format('[', formate_time_utc(period.start_timestamp_sec), " - ", // nowrap
-                              formate_time_utc(period.end_timestamp_sec), ')',          // nowrap
-                              ((period.final_gain - 1.0f) * 100.0f), '%',               // nowrap
-                              (period.base_final_gain - 1.0f) * 100.0f, '%',            // nowrap
-                              (period.final_gain / period.base_final_gain),             // nowrap
-                              period.result.simulator_volatility,                       // nowrap
+                              formate_time_utc(period.end_timestamp_sec), "):   ",      // nowrap
+                              ((period.final_gain - 1.00f) * 100.0f), "%  ",            // nowrap
+                              (period.base_final_gain - 1.00f) * 100.0f, "%  ",         // nowrap
+                              (period.final_gain / period.base_final_gain), "  ",       // nowrap
+                              period.result.simulator_volatility, "  ",                 // nowrap
                               period.result.base_volatility));
     }
 }
@@ -140,11 +140,10 @@ int main(int argc, char *argv[]) {
 
         sim_evaluation_config.fast_execute = false;
         std::unique_ptr<SimulatorDispatcher> sim_dispather = get_trade_simulator(strategy_name);
-        logInfo(string_format(sim_dispather->get_names(), '\n', " evaluation"));
+        logInfo(string_format(sim_dispather->get_names(), " evaluation"));
         std::unique_ptr<std::ofstream> account_log_stream = get_log_stream(output_account_log_file);
         std::unique_ptr<std::ofstream> simulator_log_stream = get_log_stream(output_simulator_log_file);
         SimulationLogger logger(account_log_stream.get(), simulator_log_stream.get());
-
         SimulatorEvaluationResult simulation_result = evaluate_trade_simulator(account_config,        // nowrap
                                                                                sim_evaluation_config, // nowrap
                                                                                ohlc_history,          // nowrap
@@ -154,5 +153,5 @@ int main(int argc, char *argv[]) {
         print_trade_simulator_evaluation_result(simulation_result);
     }
     std::time_t latency_end = std::time(nullptr);
-    logInfo(string_format("\nEvaluated in ", duration_to_string(latency_end - latency_start), "sec"));
+    logInfo(string_format("Evaluated in ", duration_to_string(latency_end - latency_start), "sec"));
 }
