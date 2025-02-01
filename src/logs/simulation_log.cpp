@@ -20,10 +20,17 @@ std::string SimulationLogger::account_to_csv(const Account &account) const {
                          account.total_fee);
 }
 std::string SimulationLogger::order_to_csv(const Order &order) const {
-    return string_format(order_type_to_string(order.type),                                                 // nowrap
-                         order_side_to_string(order.side),                                                 // nowrap
-                         (std::holds_alternative<Order::BaseAmount>(order.amount) ? "Base_Amount" : ""),   // nowrap
-                         (std::holds_alternative<Order::QuoteAmount>(order.amount) ? "Quote_Amount" : ""), // nowrap
+    return string_format(order_type_to_string(order.type), ',', // nowrap // nowrap
+                         order_side_to_string(order.side),
+                         ',', // nowrap                                         // nowrap
+                         (std::holds_alternative<Order::BaseAmount>(order.amount)
+                              ? (std::get<Order::BaseAmount>(order.amount).base_amount)
+                              : ' '),
+                         ',', // nowrap
+                         (std::holds_alternative<Order::QuoteAmount>(order.amount)
+                              ? (std::get<Order::BaseAmount>(order.amount).base_amount)
+                              : ' '),
+                         ',', // nowrap
                          order.price);
 }
 
@@ -37,7 +44,7 @@ void SimulationLogger::log_account_state(const OhlcTick &ohlc_tick, const Accoun
 // log current account, ohlc and order after execution
 void SimulationLogger::log_account_state(const OhlcTick &ohlc_tick, const Account &account, const Order &order) {
     if (account_state_os)
-        *account_state_os << ohlc_to_csv(ohlc_tick) << account_to_csv(account) << order_to_csv(order) << '\n';
+        *account_state_os << ohlc_to_csv(ohlc_tick) << account_to_csv(account) << ',' << order_to_csv(order) << '\n';
 }
 
 void SimulationLogger::log_simulator_state(std::string_view simulator_internal_state) {

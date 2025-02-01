@@ -32,8 +32,9 @@ SimulationResult execute_trade_simulation(const AccountConfig &account_config,  
         const OhlcTick &ohlc_tick = *ohlc_it;
 
         // Log current ohlc and account
-        if (logger)
+        if (logger) {
             logger->log_account_state(ohlc_tick, account);
+        }
 
         /*
          *  The trade simulator was updated on the previous OHLC tick OHLC_HISTORY[i-1] and emitted

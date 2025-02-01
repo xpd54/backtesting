@@ -84,7 +84,7 @@ void StopTradeSimulator::emit_stop_order(float price, std::vector<Order> &orders
 }
 
 std::string StopTradeSimulator::get_internal_state() const {
-    return string_format(_last_timestamp_sec, _last_base_balance, _last_quote_balance, _last_close,
+    return string_format(_last_timestamp_sec, ',', _last_base_balance, ',', _last_quote_balance, ',', _last_close, ',',
                          _mode == Mode::LONG ? "LONG" : "CASH", _stop_order_price);
 }
 

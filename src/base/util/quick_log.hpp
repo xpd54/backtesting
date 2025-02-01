@@ -10,7 +10,7 @@ inline std::unique_ptr<std::ofstream> get_log_stream(const std::string &log_file
     if (log_filename.empty()) {
         return nullptr;
     }
-    auto log_file_stream = std::make_unique<std::ofstream>(log_filename);
+    auto log_file_stream = std::make_unique<std::ofstream>();
     log_file_stream->open(log_filename, std::ios::out | std::ios::trunc);
     if (!log_file_stream->is_open()) {
         logInfo(string_format("Can not open log file ", log_filename));

@@ -98,7 +98,7 @@ void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick,
 }
 
 std::string RebalancingTradeSimulator::get_internal_state() const {
-    return string_format(_last_timestamp_sec, _last_base_balance, _last_quote_balance, _last_close);
+    return string_format(_last_timestamp_sec, ',', _last_base_balance, ',', _last_quote_balance, ',', _last_close);
 }
 
 std::string RebalancingSimulatorDispatcher::get_names() const {

@@ -126,7 +126,7 @@ constexpr std::array<const char *, static_cast<std::size_t>(Order::Type::Count)>
 
 constexpr const char *order_side_to_string(Order::Side side) {
     if (static_cast<size_t>(side) < static_cast<size_t>(Order::Side::Count)) {
-        return get_type_strings()[static_cast<size_t>(side)];
+        return get_side_strings()[static_cast<size_t>(side)];
     } else {
         return "NONE";
     }
