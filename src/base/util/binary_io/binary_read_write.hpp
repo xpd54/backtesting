@@ -6,8 +6,10 @@ using namespace common_util;
 namespace back_trader {
 
 template <typename T>
-std::vector<T> read_history_from_binary_file(const std::string &file_name, const std::time_t start_time,
-                                             const std::time_t end_time, std::function<bool(const T &)> validate) {
+std::vector<T> read_history_from_binary_file(const std::string &file_name, // nowrap
+                                             const std::time_t start_time, // nowrap
+                                             const std::time_t end_time,   // nowrap
+                                             std::function<bool(const T &)> validate) {
     const std::time_t latency_start_time = std::time(nullptr);
     logInfo(string_format("Reading history from binary file ", file_name));
     common_util::RMemoryMapped<T> read_file(file_name);

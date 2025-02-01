@@ -45,7 +45,9 @@ SimulationResult execute_trade_simulation(const AccountConfig &account_config,  
             const bool executed = account.execute_order(account_config, order, ohlc_tick);
             if (executed) {
                 ++count_executed_orders;
-                logger->log_account_state(ohlc_tick, account, order);
+                // Log only in case when order is executed
+                if (logger)
+                    logger->log_account_state(ohlc_tick, account, order);
             }
         }
 
