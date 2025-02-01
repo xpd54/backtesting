@@ -48,7 +48,7 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
             continue;
         }
         // have reached to the limit of end time
-        if (end_time > 0 && time >= end_time) {
+        if (end_time > 0 && time > end_time) {
             break;
         }
         start = found + 1;
@@ -138,7 +138,7 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
         if (start > 0 && timestamp_sec < start_time) {
             continue;
         }
-        if (end_time > 0 && timestamp_sec >= end_time) {
+        if (end_time > 0 && timestamp_sec > end_time) {
             break;
         }
         if (timestamp_sec <= 0 || timestamp_sec < timestamp_sec_prev) {
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
     std::time_t end_time =
         arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
     logger.log(string_format("Selected time period:- [", formate_time_utc(start_time, "%Y-%m-%d %H:%M:%S"), "] - [",
-                             formate_time_utc(end_time, "%Y-%m-%d %H:%M:%S") + "]"),
+                             formate_time_utc(end_time, "%Y-%m-%d %H:%M:%S") + ")"),
                Logger::Severity::INFO);
 
     // Error :- Getting two input at same time

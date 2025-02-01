@@ -57,7 +57,8 @@ void print_combination_of_trade_evaluation_results(const std::vector<SimulatorEv
 }
 
 void print_trade_simulator_evaluation_result(const SimulatorEvaluationResult &sim_evaluation_result) {
-    logInfo(string_format("-------------- Time Period --------------  Strategy gain | Base gain | Score | volatility"));
+    logInfo(string_format(
+        "--------------- Time Period ---------------  Strategy gain | Base gain(HODL) | Score | volatility"));
     for (const SimulatorEvaluationResult::TimePeriod &period : sim_evaluation_result.periods) {
         logInfo(string_format('[', formate_time_utc(period.start_timestamp_sec), " - ", // nowrap
                               formate_time_utc(period.end_timestamp_sec), "):   ",      // nowrap

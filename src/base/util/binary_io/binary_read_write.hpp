@@ -1,5 +1,6 @@
 #pragma once
 #include "../quick_log.hpp"
+#include "common_util/time_util.hpp"
 #include <common_util.hpp>
 #include <vector>
 using namespace common_util;
@@ -23,9 +24,12 @@ std::vector<T> read_history_from_binary_file(const std::string &file_name, // no
         uint64_t valid_count = 0;
         while (begin != end) {
             T history = *begin;
-            if (start_time > 0 && history.timestamp_sec < start_time)
+            if (start_time > 0 && history.timestamp_sec < start_time) {
+                ++begin;
                 continue;
-            if (end_time > 0 && history.timestamp_sec >= end_time)
+            }
+
+            if (end_time > 0 && history.timestamp_sec > end_time)
                 break;
             if (validate(history)) {
                 price_history.push_back(history);
