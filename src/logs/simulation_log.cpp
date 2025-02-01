@@ -1,4 +1,5 @@
 #include "simulation_log.hpp"
+#include <string>
 #include <variant>
 
 using namespace common_util;
@@ -24,17 +25,17 @@ std::string SimulationLogger::order_to_csv(const Order &order) const {
                          order_side_to_string(order.side),
                          ',', // nowrap                                         // nowrap
                          (std::holds_alternative<Order::BaseAmount>(order.amount)
-                              ? (std::get<Order::BaseAmount>(order.amount).base_amount)
-                              : ' '),
+                              ? std::to_string((std::get<Order::BaseAmount>(order.amount).base_amount))
+                              : ""),
                          ',', // nowrap
                          (std::holds_alternative<Order::QuoteAmount>(order.amount)
-                              ? (std::get<Order::BaseAmount>(order.amount).base_amount)
-                              : ' '),
+                              ? std::to_string((std::get<Order::QuoteAmount>(order.amount).quote_amount))
+                              : ""),
                          ',', // nowrap
-                         order.price);
+                         order.price > 0.0f ? std::to_string(order.price) : "");
 }
 
-std::string SimulationLogger::empty_order_csv() const { return ",,,,"; }
+std::string SimulationLogger::empty_order_csv() const { return ",,,,,"; }
 
 // log current account and ohlc state
 void SimulationLogger::log_account_state(const OhlcTick &ohlc_tick, const Account &account) {
