@@ -136,6 +136,7 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
         timestamp_sec = std::stol(temp_hold);
         // Validate timestamp
         if (start > 0 && timestamp_sec < start_time) {
+            start = new_line_pos(start) + 1;
             continue;
         }
         if (end_time > 0 && timestamp_sec > end_time) {
