@@ -1,4 +1,3 @@
-#include "common_util/time_util.hpp"
 #include "execution/simulation_executor.hpp"
 #include "execution/simulation_types.hpp"
 #include "logs/simulation_log.hpp"
@@ -62,11 +61,11 @@ void print_trade_simulator_evaluation_result(const SimulatorEvaluationResult &si
         "--------------- Time Period ---------------  Strategy gain | Base gain(HODL) | Score | volatility"));
     for (const SimulatorEvaluationResult::TimePeriod &period : sim_evaluation_result.periods) {
         logInfo(string_format('[', formate_time_utc(period.start_timestamp_sec), " - ", // nowrap
-                              formate_time_utc(period.end_timestamp_sec), "):   ",      // nowrap
-                              ((period.final_gain - 1.00f) * 100.0f), "%  ",            // nowrap
-                              (period.base_final_gain - 1.00f) * 100.0f, "%  ",         // nowrap
-                              (period.final_gain / period.base_final_gain), "  ",       // nowrap
-                              period.result.simulator_volatility, "  ",                 // nowrap
+                              formate_time_utc(period.end_timestamp_sec), "):  ",       // nowrap
+                              ((period.final_gain - 1.00f) * 100.0f), "%  | ",          // nowrap
+                              (period.base_final_gain - 1.00f) * 100.0f, "%  | ",       // nowrap
+                              (period.final_gain / period.base_final_gain), "  | ",     // nowrap
+                              period.result.simulator_volatility, "  | ",               // nowrap
                               period.result.base_volatility));
     }
 }
@@ -78,6 +77,8 @@ int main(int argc, char *argv[]) {
     Logger &logger = Logger::get_instance();
     logger.init("log_file.log", Logger::Severity::DEBUG, Logger::OutputMode::CONSOLE);
     logger.open();
+
+    /* ----------------- Validate command line argument ------------------*/
     std::unordered_map<std::string, std::string> arg_map = get_command_line_argument(argc, argv);
     for (auto &val : arg_map) {
         if (!arg_valid(val.first)) {
@@ -86,40 +87,45 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // get command line parameter
-    std::time_t start_time =
-        (arg_map["start_time"] == "" ? convert_time_string(START_TIME) : convert_time_string(arg_map["start_time"]));
-    std::time_t end_time =
-        arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
-    logInfo(string_format("Selected time period:", '[', formate_time_utc(start_time), " - ", formate_time_utc(end_time),
-                          ')'));
+    /* ------------------ Get command line arguments ---------------------*/
+    std::time_t start_time = (arg_map["start_time"] == "" ? convert_time_string(START_TIME) // nowrap
+                                                          : convert_time_string(arg_map["start_time"]));
+
+    std::time_t end_time = arg_map["end_time"] == "" ? convert_time_string(END_TIME) // nowrap
+                                                     : convert_time_string(arg_map["end_time"]);
+
     float start_base_balance = arg_map["start_base_balance"] == "" ? 1.0f : std::stof(arg_map["start_base_balance"]);
     float start_quote_balance = arg_map["start_quote_balance"] == "" ? 0.0f : std::stof(arg_map["start_quote_balance"]);
     float market_liquidity = arg_map["market_liquidity"] == "" ? 0.5 : std::stof(arg_map["market_liquidity"]);
     float max_volume_ratio = arg_map["max_volume_ratio"] == "" ? 0.5 : std::stof(arg_map["max_volume_ratio"]);
-    int evaluation_period_months =
-        arg_map["evaluation_period_months"] == "" ? 0 : std::stoi(arg_map["evaluation_period_months"]);
 
-    bool evaluate_combination =
-        arg_map["evaluate_combination"] == "" ? EVALUATE_COMBINATION : std::stoi(arg_map["evaluate_combination"]);
+    int evaluation_period_months = arg_map["evaluation_period_months"] == ""
+                                       ? 0 // nowrap
+                                       : std::stoi(arg_map["evaluation_period_months"]);
+
+    bool evaluate_combination = arg_map["evaluate_combination"] == "" ? EVALUATE_COMBINATION // nowrap
+                                                                      : std::stoi(arg_map["evaluate_combination"]);
 
     std::string strategy_name = arg_map["simulator"] == "" ? "rebalancing" : arg_map["simulator"];
     std::string input_price_history_binary_file = arg_map["input_price_history_binary_file"];
     std::string output_account_log_file = arg_map["output_account_log_file"];
     std::string output_simulator_log_file = arg_map["output_simulator_log_file"];
 
-    // Read price history
-    OhlcHistory ohlc_history =
-        read_history_from_binary_file<OhlcTick>(input_price_history_binary_file, start_time, end_time, nullptr);
+    /* --------------------------- Read price history -------------------------*/
+    OhlcHistory ohlc_history = read_from_binary_file<OhlcTick>(input_price_history_binary_file, start_time, end_time);
     // TODO:- Read and handle fear and greed
 
     AccountConfig account_config =
         get_account_config(start_base_balance, start_quote_balance, market_liquidity, max_volume_ratio);
+
     SimEvaluationConfig sim_evaluation_config;
     sim_evaluation_config.start_timestamp_sec = start_time;
     sim_evaluation_config.end_timestamp_sec = end_time;
     sim_evaluation_config.evaluation_period_months = evaluation_period_months;
+
+    // Take timestamp for latency check
     const std::time_t latency_start = std::time(nullptr);
+
     if (evaluate_combination) {
         sim_evaluation_config.fast_execute = true;
         logInfo("Evaluation Combination of simulators");
@@ -154,6 +160,8 @@ int main(int argc, char *argv[]) {
                                                                                &logger);
         print_trade_simulator_evaluation_result(simulation_result);
     }
+
+    // Take end time stamp for latency check
     std::time_t latency_end = std::time(nullptr);
     logInfo(string_format("Evaluated in ", duration_to_string(latency_end - latency_start), "sec"));
 }
