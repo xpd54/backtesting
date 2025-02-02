@@ -1,6 +1,7 @@
 #pragma once
 #include <base_header.hpp>
 #include <cstdint>
+#include <ctime>
 #include <string>
 namespace back_trader {
 // Result of trade simulation over a region of the OHLC history.
@@ -34,9 +35,9 @@ struct SimulationResult {
 
 struct SimEvaluationConfig {
     // Start timestamp (in sec).
-    int64_t start_timestamp_sec;
+    std::time_t start_timestamp_sec;
     // Ending timestamp (in sec).
-    int64_t end_timestamp_sec;
+    std::time_t end_timestamp_sec;
     // execution period (in months).
     int32_t evaluation_period_months;
     // When true, avoids computing volatility (to speed up the computation).
@@ -53,9 +54,9 @@ struct SimulatorEvaluationResult {
     // execution over a specific period.
     struct TimePeriod {
         // Start timestamp of the execution period (included).
-        int64_t start_timestamp_sec;
+        std::time_t start_timestamp_sec;
         // End timestamp of the execution period (excluded).
-        int64_t end_timestamp_sec;
+        std::time_t end_timestamp_sec;
         SimulationResult result;
         // percent gain (after fees).
         float final_gain;

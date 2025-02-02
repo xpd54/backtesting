@@ -1,3 +1,4 @@
+#include "common_util/time_util.hpp"
 #include "execution/simulation_executor.hpp"
 #include "execution/simulation_types.hpp"
 #include "logs/simulation_log.hpp"
@@ -90,8 +91,8 @@ int main(int argc, char *argv[]) {
         (arg_map["start_time"] == "" ? convert_time_string(START_TIME) : convert_time_string(arg_map["start_time"]));
     std::time_t end_time =
         arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
-    logInfo(string_format("Selected time period:\n", '[', formate_time_utc(start_time), " - ",
-                          formate_time_utc(end_time), ')'));
+    logInfo(string_format("Selected time period:", '[', formate_time_utc(start_time), " - ", formate_time_utc(end_time),
+                          ')'));
     float start_base_balance = arg_map["start_base_balance"] == "" ? 1.0f : std::stof(arg_map["start_base_balance"]);
     float start_quote_balance = arg_map["start_quote_balance"] == "" ? 0.0f : std::stof(arg_map["start_quote_balance"]);
     float market_liquidity = arg_map["market_liquidity"] == "" ? 0.5 : std::stof(arg_map["market_liquidity"]);
