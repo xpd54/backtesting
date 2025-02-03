@@ -20,9 +20,12 @@ THIS FRAMEWORK IS NOT INTENDED FOR ANY REAL-WORLD INVESTMENT DECISIONS. THE USE 
 
 #### Dependency
 
-[common-util](https://github.com/xpd54/common_util) added as git submodule.<br>
+[common-util](https://github.com/xpd54/common_util) added as git submodule.
 [gnu plot](http://www.gnuplot.info/) On mac easy installation would be `brew install gnuplot`
-C++17, CMake, LLVM
+[googletest](https://github.com/google/googletest) for unit test cases.
+C++17,
+CMake,
+Clang,
 
 #### Project-Structure
 
@@ -77,7 +80,7 @@ Rebalancing Trade Strategy :- Basic idea here is to keep the protfolio value (BT
 Example :-
 **alpha** 0.7 means that we would like to keep 70% of the total portfolio value in the base (crypto) currency,
 and 30% in the quote currency (USD) for whole execution time. So Current quick run between
-**[start_time="2017-01-01" - end_time="2024-01-01"]**
+**[start_time='2017-01-01' - end_time='2024-01-01']**
 we would mentain 70% in BTC and 30% in USD for whole 7 years while looking to make profit.
 
 **epsilon** 0.05f means maximum allowed deviation from the desired alpha-allocation.
@@ -193,3 +196,4 @@ I am using [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) to read wri
 - [ ] Run account logging on different process.
 - [ ] Rebalancing trade strategy doc.
 - [x] Integrate google test
+- [ ] Unit Test cases
