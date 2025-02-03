@@ -15,6 +15,7 @@ THIS FRAMEWORK IS NOT INTENDED FOR ANY REAL-WORLD INVESTMENT DECISIONS. THE USE 
 - [How to Run](#how-to-run)
 - [How To Add New Strategy](#how-to-add-new-strategy)
 - [Performance Details](#performance-details)
+- [Task & Improvements](#task-and-improvements)
 - [License](#license)
 
 #### Dependency
@@ -25,7 +26,7 @@ C++17, CMake, LLVM
 
 #### Project-Structure
 
-```
+```bash
 ├── backtesting
 │   ├── base (This compiles as static lib which get used in both data generation and simulation)
 │   │   ├── account (Keep track of account balance/simulate buy and sell)
@@ -90,7 +91,7 @@ So [0.735 - 0.665] which means it's allowed to allocate 73.5% to 66.5% in BTC an
 use `quick_run/quick_simulation.sh` to run trade simulation over 5 min frequancy data.
 Example commands are [HERE](https://github.com/xpd54/backtesting/tree/main/quick_run)
 
-```
+```bash
 ./trade_simulator \
 --input_price_history_binary_file="../data/bitstamp_tick_data_5min.mov" \ (change it to 30min.mov and 1h.mov for other frequncy)
 --output_account_log_file="../data/account.log" \
@@ -134,7 +135,7 @@ If we plot the portfolio value we see it started with 1 BTC and goes down (get s
 
 Let's run it with multiple combination of alpha and epsilon **[alpha|epsilon]**. Again if we look int the score we can see highest score suggest allocating most of assets in BTC which is HODL (buy and hold).
 
-```
+```bash
 ./trade_simulator \
 --input_price_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
 --output_account_log_file="../data/account.log" \
@@ -181,4 +182,14 @@ it's easily can be achived.
 
 #### Performance-Details
 
-I am using [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) to read write into file. Which map the disk file directly to memory. I have a [common-util](https://github.com/xpd54/common_util) which have easy to use header only lib.
+I am using [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) to read write into file. Which map the disk file directly to memory. I wrote a [common-util](https://github.com/xpd54/common_util) which have easy to use header only lib.
+
+#### Task-And-Improvements
+
+- [x] Single instance Logger for both console and logfile.
+- [ ] Use CRTP to avoid using virtual.
+- [x] Improve read/write with memory mapped file.
+- [x] Write OHLC data to binary file.
+- [ ] Run account logging on different process.
+- [ ] Rebalancing trade strategy doc.
+- [x] Integrate google test
