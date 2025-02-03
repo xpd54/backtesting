@@ -13,23 +13,23 @@ add_compile_options("-O3;-march=native;-fomit-frame-pointer;")
 
 add_subdirectory(external/common_util)
 include_directories(
-  src/base/
+  backtesting/base/
   external/common_util/include
 )
 
 file(GLOB base_src
-  "src/base/**/*.cpp"
+  "backtesting/base/**/*.cpp"
 )
 add_library(base STATIC ${base_src})
 add_subdirectory(data_generator)
 add_subdirectory(result_plot)
 
 file(GLOB simulator_src
-  "src/*.cpp"
-  "src/simulators/**/*.cpp"
-  "src/simulators/*.cpp"
-  "src/execution/*.cpp"
-  "src/logs/*.cpp"
+  "backtesting/*.cpp"
+  "backtesting/simulators/**/*.cpp"
+  "backtesting/simulators/*.cpp"
+  "backtesting/execution/*.cpp"
+  "backtesting/logs/*.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${simulator_src} ${base_src})
