@@ -1,4 +1,5 @@
 #include "evaluation_result.hpp"
+#include <cstddef>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -40,10 +41,14 @@ std::vector<EvaluationResult> read_result_file(const std::string &file_name) {
 }
 
 /* using gnuplot which which requires data dump */
-void write_results_to_temp_file(const std::vector<EvaluationResult> &results, const std::string &temp_filename) {
+void write_results_to_temp_file(const std::vector<EvaluationResult> &results, const std::string &temp_filename,
+                                int count_to_plot) {
     std::ofstream temp_file(temp_filename);
-    for (const auto &log : results) {
-        temp_file << log.timestamp_sec << "," << log.beta << "\n";
+    auto it = results.begin();
+    auto end = it + std::min((size_t)count_to_plot, results.size());
+    while (it != end) {
+        temp_file << it->timestamp_sec << "," << it->beta << "\n";
+        ++it;
     }
 }
 
