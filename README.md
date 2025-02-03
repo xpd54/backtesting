@@ -8,9 +8,10 @@ THIS FRAMEWORK IS NOT INTENDED FOR ANY REAL-WORLD INVESTMENT DECISIONS. THE USE 
 
 - [Dependency](#dependency)
 - [Project Structure](#project-structure)
-- [Data Download](#data)
-- [Compiling & Building](#compiling)
-- [Tick Data Generation](#input)
+- [Data Download](#data-download)
+- [Compiling & Building](#compiling-building)
+- [Tick Data Generation](#tick-data-generation)
+- [Strategy Example And Other Terms](#strategy-and-terms)
 - [How to Run](#run)
 - [Optimization levels](#levels)
 - [Eureka Found 🤯](#eureka-🤯)
@@ -43,120 +44,43 @@ C++17, CMake, LLVM
 └── result_plot (logic to plot a graph after running simulation)
 ```
 
-Data [LINK](https://www.kaggle.com/api/v1/datasets/download/saltwateroil/bitstamp-tpv-usd)
+#### Data-Download
 
-Convert csv to binary
+Time Price Volume (TPV) data is hosted on kaggle. It can be downloaded directly or with use of `wget` [link to download](https://www.kaggle.com/api/v1/datasets/download/saltwateroil/bitstamp-tpv-usd).
 
-```
-./ohlc_generator \
---input_price_history_csv_file="../data/bitstamp_tick_data.csv" \
---output_price_history_binary_file="../data/bitstamp_tick_data.mov" \
---start_time="2017-01-01" \
---end_time="2024-01-01"
-```
+create a folder name `data` and unzip data there with name `bitstamp_tick_data.csv`
+![hardware](/screenshots/data-download.png)
 
-Convert TPV to OHLC with 5 min frequency rate
+#### Compiling-Building
 
-```
-./ohlc_generator \
---input_price_history_binary_file="../data/bitstamp_tick_data.mov" \
---output_ohlc_history_binary_file="../data/bitstamp_tick_data_5min.mov" \
---start_time="2017-01-01" \
---end_time="2024-01-01" \
---interval_rate_sec=300
-```
+1. clone the repo `git clone https://github.com/xpd54/backtesting`
+2. update submodule `git submodule update --init --recursive`
+3. create a build folder and build `mkdir build && cd build && cmake .. && make`
 
-Convert TPV to OHLC with 5 min frequency rate
+This generate 3 exicutables
 
-```
-./ohlc_generator \
---input_price_history_binary_file="../data/bitstamp_tick_data.mov" \
---output_ohlc_history_binary_file="../data/bitstamp_tick_data_30min.mov" \
---start_time="2017-01-01" \
---end_time="2024-01-01" \
---interval_rate_sec=300
-```
+1. ohlc_generator (To convert TPV to binary form of OHLC data formate)
+2. trade_simulator (Execute trade simulation)
+3. plot (plot graph with evaluation log)
 
-Convert TPV to OHLC with 1h frequency rate
+#### Tick-Data-Generation
 
-```
-./ohlc_generator \
---input_price_history_binary_file="../data/bitstamp_tick_data.mov" \
---output_ohlc_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
---start_time="2017-01-01" \
---end_time="2024-01-01" \
---interval_rate_sec=3600
-```
+Any trade simulation we would like to run on different frequency of tick data. `ohlc_generator` does this to do it quickly with **[start_time - end_time)** (time range to consider for ohlc (open high low close))
 
-Run Trade Simulation on 5 min frequency
+`cd quick_run && chmod +x quick_ohlc_generation.sh`
+`./quick_ohlc_generation.sh` (might take a minute or two as tpv data is close to 3.2gb). I suggest checking `quick_ohlc_generation.sh` before running it, naming convention is self explanatory.
 
-```
-./trade_simulator \
---input_price_history_binary_file="../data/bitstamp_tick_data_5min.mov" \
---output_account_log_file="../data/account.log" \
---output_simulator_log_file="../data/simulator.log" \
---start_time="2017-01-01" \
---end_time="2024-01-01" \
---start_base_balance=1.0 \
---start_quote_balance=0.0
-```
+#### Strategy-and-Terms
 
-Run Trade Simulation on 30 min frequency
+Rebalancing Trade Strategy :- Basic idea here is to keep the protfolio value (BTC \* BTC price + USD) in a way where crypto currency weight is defined by **alpha** and it's allowed to go up and down by **epsilon**.
+Example :-
+**alpha** 0.7 means that we would like to keep 70% of the total portfolio value in the base (crypto) currency,
+and 30% in the quote currency (USD) for whole execution time. So Current quick run between
+**[start_time="2017-01-01" - end_time="2024-01-01"]**
+we would mentain 70% in BTC and 30% in USD for whole 7 years while looking to make profit.
 
-```
-./trade_simulator \
---input_price_history_binary_file="../data/bitstamp_tick_data_30min.mov" \
---output_account_log_file="../data/account.log" \
---output_simulator_log_file="../data/simulator.log" \
---start_time="2017-01-01" \
---end_time="2024-01-01" \
---start_base_balance=1.0 \
---start_quote_balance=0.0
-```
+**epsilon** 0.05f means maximum allowed deviation from the desired alpha-allocation.
+We allow the actual base (crypto) currency allocation to be within the interval: **[alpha x (1 - epsilon) - alpha x (1 + epsilon)]**.
 
-Run Trade Simulation on 1 hour frequency
-
-```
-./trade_simulator \
---input_price_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
---output_account_log_file="../data/account.log" \
---output_simulator_log_file="../data/simulator.log" \
---start_time="2017-01-01" \
---end_time="2024-01-01" \
---start_base_balance=1.0 \
---start_quote_balance=0.0
-```
-
-Run Trade Simulation on 1 hour frequency for multiple 6 month period
-
-```
-./trade_simulator \
---input_price_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
---output_account_log_file="../data/account.log" \
---output_simulator_log_file="../data/simulator.log" \
---evaluation_period_months=6 \
---start_time="2017-01-01" \
---end_time="2024-01-01" \
---start_base_balance=1.0 \
---start_quote_balance=0.0
-```
-
-Run Trade Simulation on 1 hour frequency for multiple 6 month period with all combination
-(Getting best alpha and epsiolon sorted with score)
-
-```
-./trade_simulator \
---input_price_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
---output_account_log_file="../data/account.log" \
---output_simulator_log_file="../data/simulator.log" \
---evaluation_period_months=6 \
---start_time="2017-01-01" \
---end_time="2024-01-01" \
---start_base_balance=1.0 \
---start_quote_balance=0.0 \
---evaluate_combination=1
-```
-
-```
-./plot --output_account_log_file="../data/account.log"
-```
+So [0.735 - 0.665] which means it's allowed to allocate 73.5% to 66.5% in BTC and rest corresponding in USD.
+<small>codebase is self explanatory but will add more clarity in words soon!!</small>
