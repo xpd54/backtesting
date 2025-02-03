@@ -13,6 +13,7 @@ THIS FRAMEWORK IS NOT INTENDED FOR ANY REAL-WORLD INVESTMENT DECISIONS. THE USE 
 - [Tick Data Generation](#tick-data-generation)
 - [Strategy Example And Other Terms](#strategy-and-terms)
 - [How to Run](#how-to-run)
+- [How To Add New Strategy](#how-to-add-new-strategy)
 - [Performance Details](#performance-details)
 - [License](#license)
 
@@ -171,6 +172,12 @@ Let's run it with multiple combination of alpha and epsilon **[alpha|epsilon]**.
 ```
 
 <small>TODO:- Add more details on how rebalancing trade strategy works</small>
+
+#### How-To-Add-New-Strategy
+
+By implementation of interface provided into `backtesting/base/trade_simulator/trade_simulator.hpp`
+And updating `backtesting/simulators/simulator_factory.hpp` and `backtesting/simulators/strategy/common_strategy_config.hpp`
+it's easily can be achived.
 
 #### Performance-Details
 
