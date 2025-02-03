@@ -32,6 +32,8 @@ Convert TPV to OHLC with 1h frequency rate
 --interval_rate_sec=3600
 ```
 
+Run Trade Simulation on 5 min frequency
+
 ```
 ./trade_simulator \
 --input_price_history_binary_file="../data/bitstamp_tick_data_5min.mov" \
@@ -41,6 +43,49 @@ Convert TPV to OHLC with 1h frequency rate
 --end_time="2022-01-01" \
 --start_base_balance=1.0 \
 --start_quote_balance=0.0
+```
+
+Run Trade Simulation on 1 hour frequency
+
+```
+./trade_simulator \
+--input_price_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
+--output_account_log_file="../data/account.log" \
+--output_simulator_log_file="../data/simulator.log" \
+--start_time="2017-01-01" \
+--end_time="2022-01-01" \
+--start_base_balance=1.0 \
+--start_quote_balance=0.0
+```
+
+Run Trade Simulation on 1 hour frequency for multiple 6 month period
+
+```
+./trade_simulator \
+--input_price_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
+--output_account_log_file="../data/account.log" \
+--output_simulator_log_file="../data/simulator.log" \
+--evaluation_period_months=6 \
+--start_time="2017-01-01" \
+--end_time="2022-01-01" \
+--start_base_balance=1.0 \
+--start_quote_balance=0.0
+```
+
+Run Trade Simulation on 1 hour frequency for multiple 6 month period with all combination
+(Getting best alpha and epsiolon sorted with score)
+
+```
+./trade_simulator \
+--input_price_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
+--output_account_log_file="../data/account.log" \
+--output_simulator_log_file="../data/simulator.log" \
+--evaluation_period_months=6 \
+--start_time="2017-01-01" \
+--end_time="2022-01-01" \
+--start_base_balance=1.0 \
+--start_quote_balance=0.0 \
+--evaluate_combination=1
 ```
 
 ```
