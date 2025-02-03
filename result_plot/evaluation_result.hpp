@@ -16,5 +16,6 @@ struct EvaluationResult {
 };
 
 std::vector<EvaluationResult> read_result_file(const std::string &file_name);
-void write_results_to_temp_file(const std::vector<EvaluationResult> &results, const std::string &temp_filename);
+void write_results_to_temp_file(const std::vector<EvaluationResult> &results, const std::string &temp_filename,
+                                int count_to_plot);
 void plot_data(const std::string &temp_filename);
