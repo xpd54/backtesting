@@ -196,5 +196,6 @@ I am using [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) to read wri
 - [x] Write OHLC data to binary file.
 - [ ] Run account logging on different process.
 - [ ] Rebalancing trade strategy doc.
+- [ ] Financial indicators
 - [x] Integrate google test
 - [ ] Unit Test cases
