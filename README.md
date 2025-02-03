@@ -10,7 +10,7 @@ Convert csv to binary
 --end_time="2022-01-01"
 ```
 
-Convert TPV to OHLC with 5 min sampling rate
+Convert TPV to OHLC with 5 min frequency rate
 
 ```
 ./ohlc_generator \
@@ -21,7 +21,7 @@ Convert TPV to OHLC with 5 min sampling rate
 --interval_rate_sec=300
 ```
 
-Convert TPV to OHLC with 1h sampling rate
+Convert TPV to OHLC with 1h frequency rate
 
 ```
 ./ohlc_generator \
@@ -35,8 +35,8 @@ Convert TPV to OHLC with 1h sampling rate
 ```
 ./trade_simulator \
 --input_price_history_binary_file="../data/bitstampUSD_5min.mov" \
---output_account_log_file="../data/hello_account.log" \
---output_simulator_log_file="../data/hello_sim.log" \
+--output_account_log_file="../data/account.log" \
+--output_simulator_log_file="../data/simulator.log" \
 --start_time="2017-01-01" \
 --end_time="2022-01-01" \
 --start_base_balance=1.0 \
