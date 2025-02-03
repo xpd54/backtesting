@@ -12,7 +12,7 @@ THIS FRAMEWORK IS NOT INTENDED FOR ANY REAL-WORLD INVESTMENT DECISIONS. THE USE 
 - [Compiling & Building](#compiling-building)
 - [Tick Data Generation](#tick-data-generation)
 - [Strategy Example And Other Terms](#strategy-and-terms)
-- [How to Run](#run)
+- [How to Run](#how-to-run)
 - [Optimization levels](#levels)
 - [Eureka Found 🤯](#eureka-🤯)
 - [License](#license)
@@ -84,3 +84,75 @@ We allow the actual base (crypto) currency allocation to be within the interval:
 
 So [0.735 - 0.665] which means it's allowed to allocate 73.5% to 66.5% in BTC and rest corresponding in USD.
 <small>codebase is self explanatory but will add more clarity in words soon!!</small>
+
+#### How-to-Run
+
+use `quick_run/quick_simulation.sh` to run trade simulation over 5 min frequancy data.
+
+```
+./trade_simulator \
+--input_price_history_binary_file="../data/bitstamp_tick_data_5min.mov" \ (change it to 30min.mov and 1h.mov for other frequncy)
+--output_account_log_file="../data/account.log" \
+--output_simulator_log_file="../data/simulator.log" \
+--start_time="2017-01-01" \ (start execution from jan 2017 to jan 2024)
+--end_time="2024-01-01" \
+--start_base_balance=1.0 \ (we have 1 btc to start with)
+--start_quote_balance=0.0 \ (we have 0 usd to start with)
+```
+
+Here we can see with rebalancing trade strategy we have gain of 2043.60%. But if we would have just buy and hold it's 4272.85%. Well HODL strategy is the best in crypto market do time travel and buy in 2011 and sell in 2024 that's [HODL](https://www.investopedia.com/terms/h/hodl.asp).
+
+```
+[2025-02-03 20:47:00.665] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.7000|0.0500] evaluation
+[2025-02-03 20:47:05.889] [0x7ff8599feb40] [INFO] --------------- Time Period ---------------  Strategy gain | Base gain(HODL) | Score | volatility
+[2025-02-03 20:47:05.890] [0x7ff8599feb40] [INFO] [2017-01-01 00:00:00 - 2024-01-01 00:00:00):  2043.6094%  | 4272.8594%  | 0.4902  | 0.0000  | 0.0000
+[2025-02-03 20:47:05.895] [0x7ff8599feb40] [INFO] Evaluated in 0:0:5sec
+```
+
+if we run same strategy over diff frequncy it should be close enough (2055% gain) on 1h frequncy with similar 0.49 score.
+
+```
+[2025-02-03 20:55:00.884] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.7000|0.0500] evaluation
+[2025-02-03 20:55:01.650] [0x7ff8599feb40] [INFO] --------------- Time Period ---------------  Strategy gain | Base gain(HODL) | Score | volatility
+[2025-02-03 20:55:01.650] [0x7ff8599feb40] [INFO] [2017-01-01 00:00:00 - 2024-01-01 00:00:00):  2055.8738%  | 4271.8188%  | 0.4931  | 0.0000  | 0.0000
+[2025-02-03 20:55:01.657] [0x7ff8599feb40] [INFO] Evaluated in 0:0:1sec
+```
+
+We should look into our evaluation log which shows we are selling our 0.3 btc immediately we our alpha was set for 0.7 (70% in btc) we achive that balance.
+
+```
+1483228800,966.3400,966.9900,964.6000,966.6000,102.4848,1.0000,0.0000,0.0000,,,,,
+1483232400,966.6000,966.6000,962.5400,963.8700,149.0256,1.0000,0.0000,0.0000,,,,,
+1483232400,966.6000,966.6000,962.5400,963.8700,149.0256,0.7000,287.9200,1.4500,MARKET,SELL,0.300000,,
+1483236000,964.3500,965.7500,961.9900,963.9700,94.2674,0.7000,287.9200,1.4500,,,,,
+```
+
+If we plot the portfolio value we see it started with 1 BTC and goes down (get sold and alocate in USD) asap after that it trade in range of [0.735 - 0.665] (73.5% to 66.5%) of allocation.
+(Number of data point which i am using is limited to 30000 as higher data point plot generation become slower)
+![Plot](/screenshots/gnuplot.png)
+
+Let's run it with multiple combination of alpha and epsilon **[alpha|epsilon]**. Again if we look int the score we can see highest score suggest allocating most of assets in BTC which is HODL (buy and hold).
+
+```
+[2025-02-03 21:05:18.790] [0x7ff8599feb40] [INFO] Evaluation Combination of simulators
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.9000|0.2000]: 1.0000
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.9000|0.1000]: 0.9948
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.9000|0.0500]: 0.9905
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.9000|0.0100]: 0.9812
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.7000|0.2000]: 0.9586
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.7000|0.0500]: 0.9509
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.7000|0.1000]: 0.9483
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.7000|0.0100]: 0.9421
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.5000|0.1000]: 0.9132
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.5000|0.2000]: 0.9126
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.5000|0.0500]: 0.9085
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.5000|0.0100]: 0.8923
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.3000|0.2000]: 0.8647
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.3000|0.1000]: 0.8625
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.3000|0.0500]: 0.8556
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.3000|0.0100]: 0.8429
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.1000|0.2000]: 0.8064
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.1000|0.1000]: 0.8048
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.1000|0.0500]: 0.8024
+[2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.1000|0.0100]: 0.7963
+```
