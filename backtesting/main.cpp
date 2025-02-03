@@ -28,6 +28,19 @@ AccountConfig get_account_config(const float start_base_balance,  // nowrap
     return config;
 }
 
+void print_account_config(AccountConfig &account_config) {
+    logInfo(string_format("\n-- Current Account Configuration --",                                     // nowrap
+                          "\n   start_base_balance: ", account_config.start_base_balance,              // nowrap
+                          "\n   start_quote_balance: ", account_config.start_quote_balance,            // nowrap
+                          "\n   base_uni: ", account_config.base_unit,                                 // nowrap
+                          "\n   quote_uni: ", account_config.quote_unit,                               // nowrap
+                          "\n   relative fee : ", account_config.market_order_fee_config.relative_fee, // nowrap
+                          "\n   fixed fee : ", account_config.market_order_fee_config.fixed_fee,       // nowrap
+                          "\n   minimum fee : ", account_config.market_order_fee_config.minimum_fee,   // nowrap
+                          "\n   market_liquidity: ", account_config.market_liquidity,                  // nowrap
+                          "\n   max_volume_ratio: ", account_config.max_volume_ratio));
+}
+
 template <typename T>
 std::vector<T> read_from_binary_file(const std::string &binary_file_name, std::time_t start_time,
                                      std::time_t end_time) {
@@ -117,7 +130,7 @@ int main(int argc, char *argv[]) {
 
     AccountConfig account_config =
         get_account_config(start_base_balance, start_quote_balance, market_liquidity, max_volume_ratio);
-
+    print_account_config(account_config);
     SimEvaluationConfig sim_evaluation_config;
     sim_evaluation_config.start_timestamp_sec = start_time;
     sim_evaluation_config.end_timestamp_sec = end_time;
