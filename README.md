@@ -13,13 +13,12 @@ THIS FRAMEWORK IS NOT INTENDED FOR ANY REAL-WORLD INVESTMENT DECISIONS. THE USE 
 - [Tick Data Generation](#tick-data-generation)
 - [Strategy Example And Other Terms](#strategy-and-terms)
 - [How to Run](#how-to-run)
-- [Optimization levels](#levels)
-- [Eureka Found 🤯](#eureka-🤯)
+- [Performance Details](#performance-details)
 - [License](#license)
 
 #### Dependency
 
-[common-util](https://github.com/xpd54/common_util) added as git submodule.
+[common-util](https://github.com/xpd54/common_util) added as git submodule.<br>
 [gnu plot](http://www.gnuplot.info/) On mac easy installation would be `brew install gnuplot`
 C++17, CMake, LLVM
 
@@ -88,6 +87,7 @@ So [0.735 - 0.665] which means it's allowed to allocate 73.5% to 66.5% in BTC an
 #### How-to-Run
 
 use `quick_run/quick_simulation.sh` to run trade simulation over 5 min frequancy data.
+Example commands are [HERE](https://github.com/xpd54/backtesting/tree/main/quick_run)
 
 ```
 ./trade_simulator \
@@ -134,6 +134,19 @@ If we plot the portfolio value we see it started with 1 BTC and goes down (get s
 Let's run it with multiple combination of alpha and epsilon **[alpha|epsilon]**. Again if we look int the score we can see highest score suggest allocating most of assets in BTC which is HODL (buy and hold).
 
 ```
+./trade_simulator \
+--input_price_history_binary_file="../data/bitstamp_tick_data_1h.mov" \
+--output_account_log_file="../data/account.log" \
+--output_simulator_log_file="../data/simulator.log" \
+--evaluation_period_months=6 \
+--start_time="2017-01-01" \
+--end_time="2024-01-01" \
+--start_base_balance=1.0 \
+--start_quote_balance=0.0 \
+--evaluate_combination=1
+```
+
+```
 [2025-02-03 21:05:18.790] [0x7ff8599feb40] [INFO] Evaluation Combination of simulators
 [2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.9000|0.2000]: 1.0000
 [2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.9000|0.1000]: 0.9948
@@ -156,3 +169,9 @@ Let's run it with multiple combination of alpha and epsilon **[alpha|epsilon]**.
 [2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.1000|0.0500]: 0.8024
 [2025-02-03 21:05:18.886] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.1000|0.0100]: 0.7963
 ```
+
+<small>TODO:- Add more details on how rebalancing trade strategy works</small>
+
+#### Performance-Details
+
+I am using [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) to read write into file. Which map the disk file directly to memory. I have a [common-util](https://github.com/xpd54/common_util) which have easy to use header only lib.
