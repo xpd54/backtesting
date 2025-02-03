@@ -22,6 +22,7 @@ file(GLOB base_src
 )
 add_library(base STATIC ${base_src})
 add_subdirectory(data_generator)
+add_subdirectory(result_plot)
 
 file(GLOB simulator_src
   "src/*.cpp"
