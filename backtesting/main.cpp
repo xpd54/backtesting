@@ -29,16 +29,17 @@ AccountConfig get_account_config(const float start_base_balance,  // nowrap
 }
 
 void print_account_config(AccountConfig &account_config) {
-    logInfo(string_format("\n-- Current Account Configuration --",                                     // nowrap
-                          "\n   start_base_balance: ", account_config.start_base_balance,              // nowrap
-                          "\n   start_quote_balance: ", account_config.start_quote_balance,            // nowrap
-                          "\n   base_uni: ", account_config.base_unit,                                 // nowrap
-                          "\n   quote_uni: ", account_config.quote_unit,                               // nowrap
-                          "\n   relative fee : ", account_config.market_order_fee_config.relative_fee, // nowrap
-                          "\n   fixed fee : ", account_config.market_order_fee_config.fixed_fee,       // nowrap
-                          "\n   minimum fee : ", account_config.market_order_fee_config.minimum_fee,   // nowrap
-                          "\n   market_liquidity: ", account_config.market_liquidity,                  // nowrap
-                          "\n   max_volume_ratio: ", account_config.max_volume_ratio));
+    logInfo(string_format(                                                           // nowrap
+        "\n-- Current Account Configuration --",                                     // nowrap
+        "\n   start_base_balance: ", account_config.start_base_balance,              // nowrap
+        "\n   start_quote_balance: ", account_config.start_quote_balance,            // nowrap
+        "\n   base_uni: ", account_config.base_unit,                                 // nowrap
+        "\n   quote_uni: ", account_config.quote_unit,                               // nowrap
+        "\n   relative fee : ", account_config.market_order_fee_config.relative_fee, // nowrap
+        "\n   fixed fee : ", account_config.market_order_fee_config.fixed_fee,       // nowrap
+        "\n   minimum fee : ", account_config.market_order_fee_config.minimum_fee,   // nowrap
+        "\n   market_liquidity: ", account_config.market_liquidity,                  // nowrap
+        "\n   max_volume_ratio: ", account_config.max_volume_ratio));
 }
 
 template <typename T>
