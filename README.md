@@ -135,6 +135,9 @@ We should look into our evaluation log which shows we are selling our 0.3 BTC im
 ```
 
 If we plot the portfolio value we see it started with 1 BTC and goes down (get sold and allocate in USD) asap after that it trades in the range of [0.735 - 0.665] (73.5% to 66.5%) of allocation.
+
+`./plot --output_account_log_file="../data/account.log"`
+
 (The number of data points that I am using is limited to 30000 as higher data point plot generation becomes slower)
 ![Plot](/screenshots/gnuplot.png)
 
