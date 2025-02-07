@@ -51,9 +51,10 @@ Clang,
 
 #### Data-Download
 
-Time Price Volume (TPV) data is hosted on [kaggle](https://www.kaggle.com/datasets/saltwateroil/bitstamp-tpv-usd). It can be downloaded directly or with use of `wget` [link to download](https://www.kaggle.com/api/v1/datasets/download/saltwateroil/bitstamp-tpv-usd).
+Time Price Volume (TPV) data is hosted on [kaggle](https://www.kaggle.com/datasets/saltwateroil/bitstamp-tpv-usd). It can be downloaded directly or with use of `wget` 
+[link to download](https://www.kaggle.com/api/v1/datasets/download/saltwateroil/bitstamp-tpv-usd).
 
-create a folder name `data` and unzip data there with name `bitstamp_tick_data.csv`
+Create a folder named `data` and unzip data there with the name `bitstamp_tick_data.csv`<br>
 ![hardware](/screenshots/data-download.png)
 
 #### Compiling-Building
