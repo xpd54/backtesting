@@ -1,3 +1,4 @@
+#include "common_util/Logger.hpp"
 #include "execution/simulation_executor.hpp"
 #include "execution/simulation_types.hpp"
 #include "logs/simulation_log.hpp"
@@ -96,7 +97,9 @@ int main(int argc, char *argv[]) {
     std::unordered_map<std::string, std::string> arg_map = get_command_line_argument(argc, argv);
     for (auto &val : arg_map) {
         if (!arg_valid(val.first)) {
-            logger.log(string_format(val.first, " argument is not valid"), Logger::Severity::ERROR);
+            logger(Logger::Severity::ERROR);
+            logger << val.first << " "
+                   << "argument is not valid" << Logger::endl;
             std::exit(EXIT_FAILURE);
         }
     }

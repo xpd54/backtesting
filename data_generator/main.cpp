@@ -1,3 +1,5 @@
+#include "common_util/Logger.hpp"
+#include "util/quick_log.hpp"
 #include <base_header.hpp>
 #include <cassert>
 #include <common_util.hpp>
@@ -253,14 +255,14 @@ OhlcHistory convert_price_history_to_ohlc_history(const PriceHistory &price_hist
 int main(int argc, char *argv[]) {
     /*Initialize logger*/
     Logger &logger = Logger::get_instance();
-    logger.init("log_file.log", Logger::Severity::DEBUG, Logger::OutputMode::CONSOLE);
+    logger.init("log_file.log", Logger::Severity::INFO, Logger::OutputMode::CONSOLE);
     logger.open();
     /*validate arguments*/
     // TODO :- use std::varient to hold argument value or default error code.
     std::unordered_map<std::string, std::string> arg_map = get_command_line_argument(argc, argv);
     for (auto &val : arg_map) {
         if (!arg_valid(val.first)) {
-            logger.log(string_format(val.first, " argument is not valid"), Logger::Severity::ERROR);
+            logError(string_format(val.first, " argument is not valid"));
             std::exit(EXIT_FAILURE);
         }
     }
@@ -288,19 +290,19 @@ int main(int argc, char *argv[]) {
         (arg_map["start_time"] == "" ? convert_time_string(START_TIME) : convert_time_string(arg_map["start_time"]));
     std::time_t end_time =
         arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
-    logger.log(string_format("Selected time period:- [", formate_time_utc(start_time, "%Y-%m-%d %H:%M:%S"), "] - [",
-                             formate_time_utc(end_time, "%Y-%m-%d %H:%M:%S") + ")"),
-               Logger::Severity::INFO);
+    logger << "Selected time period:- "
+           << "[" << formate_time_utc(start_time, "%Y-%m-%d %H:%M:%S") << "] - ["
+           << formate_time_utc(end_time, "%Y-%m-%d %H:%M:%S") << ")" << Logger::endl;
 
     // Error :- Getting two input at same time
     if (!input_price_history_csv_file.empty() && !input_price_history_binary_file.empty()) {
-        logger.log("Cannot process two input price history files", Logger::Severity::ERROR);
+        logError("Cannot process two input price history files");
         std::exit(EXIT_FAILURE);
     }
 
     // Error :- Getting two ohlc history files
     if (!input_ohlc_history_csv_file.empty() && !input_ohlc_history_binary_file.empty()) {
-        logger.log("Cannot process two input OHLC history files", Logger::Severity::ERROR);
+        logError("Cannot process two input OHLC history files");
         std::exit(EXIT_FAILURE);
     }
 
@@ -313,12 +315,12 @@ int main(int argc, char *argv[]) {
 
     // we would ignore fear_and_greed_history (fear & greed) for now
     if (num_history_files > 1) {
-        logger.log("Cannot read more than one input history file", Logger::Severity::ERROR);
+        logError("Cannot read more than one input history file");
         std::exit(EXIT_FAILURE);
     }
 
     if (num_history_files == 0) {
-        logger.log("Input history file not specified", Logger::Severity::ERROR);
+        logError("Input history file not specified");
         std::exit(EXIT_FAILURE);
     }
 

@@ -3,8 +3,8 @@
 #include <common_util.hpp>
 using namespace common_util;
 namespace back_trader {
-inline void logInfo(std::string str) { Logger::get_instance().log(str, Logger::Severity::INFO); }
-inline void logError(std::string str) { Logger::get_instance().log(str, Logger::Severity::ERROR); }
+inline void logInfo(std::string str) { Logger::get_instance()(Logger::Severity::INFO) << str << Logger::endl; }
+inline void logError(std::string str) { Logger::get_instance()(Logger::Severity::ERROR) << str << Logger::endl; }
 
 inline std::unique_ptr<std::ofstream> get_log_stream(const std::string &log_filename) {
     if (log_filename.empty()) {
