@@ -77,27 +77,27 @@ Any trade simulation we would like to run on different frequency of tick data. `
 
 #### Strategy-and-Terms
 
-Rebalancing Trade Strategy :- Basic idea here is to keep the protfolio value (BTC \* BTC price + USD) in a way where crypto currency weight is defined by **alpha** and it's allowed to go up and down by **epsilon**.
-Example :-
+Rebalancing Trade Strategy:- The basic idea here is to keep the portfolio value (BTC \* BTC price + USD) in a way where cryptocurrency weight is defined by **alpha** and it's allowed to go up and down by **epsilon**.
+Example:-
 **alpha** 0.7 means that we would like to keep 70% of the total portfolio value in the base (crypto) currency,
 and 30% in the quote currency (USD) for whole execution time. So Current quick run between
 **[start_time='2017-01-01' - end_time='2024-01-01']**
-we would mentain 70% in BTC and 30% in USD for whole 7 years while looking to make profit.
+we would maintain 70% in BTC and 30% in USD for the whole 7 years while looking to make a profit.
 
-**epsilon** 0.05f means maximum allowed deviation from the desired alpha-allocation.
+**epsilon** 0.05f means the maximum allowed deviation from the desired alpha allocation.
 We allow the actual base (crypto) currency allocation to be within the interval: **[alpha x (1 - epsilon) - alpha x (1 + epsilon)]**.
 
-So [0.735 - 0.665] which means it's allowed to allocate 73.5% to 66.5% in BTC and rest corresponding in USD.
-<small>codebase is self explanatory but will add more clarity in words soon!!</small>
+So [0.735 - 0.665] which means it's allowed to allocate 73.5% to 66.5% in BTC and the rest corresponding in USD.
+<small>codebase is self-explanatory but will add more clarity in words soon!!</small>
 
 #### How-to-Run
 
-use `quick_run/quick_simulation.sh` to run trade simulation over 5 min frequancy data.
+use `quick_run/quick_simulation.sh` to run trade simulation over 5 min frequency data.
 Example commands are [HERE](https://github.com/xpd54/backtesting/tree/main/quick_run)
 
 ```bash
 ./trade_simulator \
---input_price_history_binary_file="../data/bitstamp_tick_data_5min.mov" \ (change it to 30min.mov and 1h.mov for other frequncy)
+--input_price_history_binary_file="../data/bitstamp_tick_data_5min.mov" \ (change it to 30min.mov and 1h.mov for other frequency)
 --output_account_log_file="../data/account.log" \
 --output_simulator_log_file="../data/simulator.log" \
 --start_time="2017-01-01" \ (start execution from jan 2017 to jan 2024)
@@ -106,7 +106,7 @@ Example commands are [HERE](https://github.com/xpd54/backtesting/tree/main/quick
 --start_quote_balance=0.0 \ (we have 0 usd to start with)
 ```
 
-Here we can see with rebalancing trade strategy we have gain of 2043.60%. But if we would have just buy and hold it's 4272.85%. Well HODL strategy is the best in crypto market do time travel and buy in 2011 and sell in 2024 that's [HODL](https://www.investopedia.com/terms/h/hodl.asp).
+Here we can see with the rebalancing trade strategy we have a gain of **2043.60%**. But if we would have just bought and hold it would have been **4272.85%**. Well HODL strategy is the best in the crypto market do time travel and buy in 2011 and sell in 2024 that's [HODL](https://www.investopedia.com/terms/h/hodl.asp).
 
 ```
 [2025-02-03 20:47:00.665] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.7000|0.0500] evaluation
@@ -115,7 +115,7 @@ Here we can see with rebalancing trade strategy we have gain of 2043.60%. But if
 [2025-02-03 20:47:05.895] [0x7ff8599feb40] [INFO] Evaluated in 0:0:5sec
 ```
 
-if we run same strategy over diff frequncy it should be close enough (2055% gain) on 1h frequncy with similar 0.49 score.
+if we run the same strategy over diff frequencies it should be close enough (2055% gain) on 1h frequency with a similar 0.49 score.
 
 ```
 [2025-02-03 20:55:00.884] [0x7ff8599feb40] [INFO] rebalancing_trade_simulator[0.7000|0.0500] evaluation
@@ -124,7 +124,7 @@ if we run same strategy over diff frequncy it should be close enough (2055% gain
 [2025-02-03 20:55:01.657] [0x7ff8599feb40] [INFO] Evaluated in 0:0:1sec
 ```
 
-We should look into our evaluation log which shows we are selling our 0.3 btc immediately we our alpha was set for 0.7 (70% in btc) we achive that balance.
+We should look into our evaluation log which shows we are selling our 0.3 BTC immediately where our alpha was set for 0.7 (70% in BTC) we achieved that balance.
 
 ```
 1483228800,966.3400,966.9900,964.6000,966.6000,102.4848,1.0000,0.0000,0.0000,,,,,
@@ -133,11 +133,11 @@ We should look into our evaluation log which shows we are selling our 0.3 btc im
 1483236000,964.3500,965.7500,961.9900,963.9700,94.2674,0.7000,287.9200,1.4500,,,,,
 ```
 
-If we plot the portfolio value we see it started with 1 BTC and goes down (get sold and alocate in USD) asap after that it trade in range of [0.735 - 0.665] (73.5% to 66.5%) of allocation.
-(Number of data point which i am using is limited to 30000 as higher data point plot generation become slower)
+If we plot the portfolio value we see it started with 1 BTC and goes down (get sold and allocate in USD) asap after that it trades in the range of [0.735 - 0.665] (73.5% to 66.5%) of allocation.
+(The number of data points that I am using is limited to 30000 as higher data point plot generation becomes slower)
 ![Plot](/screenshots/gnuplot.png)
 
-Let's run it with multiple combination of alpha and epsilon **[alpha|epsilon]**. Again if we look int the score we can see highest score suggest allocating most of assets in BTC which is HODL (buy and hold).
+Let's run it with multiple combinations of alpha and epsilon **[alpha|epsilon]**. Again if we look int the score we can see highest score suggest allocating most of the assets in BTC which is HODL (buy and hold).
 
 ```bash
 ./trade_simulator \
@@ -180,21 +180,21 @@ Let's run it with multiple combination of alpha and epsilon **[alpha|epsilon]**.
 
 #### How-To-Add-New-Strategy
 
-By implementation of interface provided into `backtesting/base/trade_simulator/trade_simulator.hpp`
+By implementation of an interface provided into `backtesting/base/trade_simulator/trade_simulator.hpp`
 And updating `backtesting/simulators/simulator_factory.hpp` and `backtesting/simulators/strategy/common_strategy_config.hpp`
-it's easily can be achived.
+it's easily can be achieved.
 
 #### Performance-Details
 
-I am using [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) to read write into file. Which map the disk file directly to memory. I wrote a [common-util](https://github.com/xpd54/common_util) which have easy to use header only lib.
+I am using [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) to read and write into the file. Which map the disk file directly to memory. I wrote a [common-util](https://github.com/xpd54/common_util) which have easy to use header-only lib.
 
 #### Task-And-Improvements
 
 - [x] Single instance Logger for both console and logfile.
 - [ ] Use CRTP to avoid using virtual.
 - [x] Improve read/write with memory mapped file.
-- [x] Write OHLC data to binary file.
-- [ ] Run account logging on different process.
+- [x] Write OHLC data to a binary file.
+- [ ] Run account logging on different processes.
 - [ ] Rebalancing trade strategy doc.
 - [ ] Financial indicators
 - [x] Integrate google test
