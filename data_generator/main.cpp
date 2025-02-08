@@ -18,7 +18,8 @@ namespace back_trader {
 PriceHistory read_price_history_from_csv_file(const std::string &file_name, const std::time_t start_time,
                                               const std::time_t end_time) {
     const std::time_t latency_start_time = std::time(nullptr);
-    logInfo(string_format("Reading price from csv file:- ", file_name));
+    Logger &logger = Logger::get_instance();
+    logger << "Reading price from csv file:- " << file_name << Logger::endl;
 
     // Memory map the file as string_view
     common_util::RMemoryMapped<char> read_file(file_name);
@@ -68,9 +69,9 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = price_history.size();
-
-    logInfo(string_format("Loaded ", total_record, " records in ",
-                          duration_to_string(latency_end_time - latency_start_time)));
+    logger << "Loaded " << total_record << " records in "               // nowrap
+           << duration_to_string(latency_end_time - latency_start_time) // nowrap
+           << Logger::endl;
     return price_history;
 }
 
@@ -93,7 +94,8 @@ PriceHistory read_price_histry_from_binary_file(const std::string &file_name, co
 OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const std::time_t start_time,
                                             const std::time_t end_time) {
     const std::time_t latency_start_time = std::time(nullptr);
-    logInfo(string_format("Reading OHLC history from:- ", file_name));
+    Logger &logger = Logger::get_instance();
+    logger << "Reading OHLC history from:- " << file_name << Logger::endl;
     common_util::RMemoryMapped<char> read_file(file_name);
     const char *begin = read_file.begin();
     size_t view_size = read_file.size();
@@ -170,8 +172,8 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = ohlc_history.size();
-    logInfo(string_format("Loaded ", total_record, " OHLC ticks in ",
-                          duration_to_string(latency_end_time - latency_start_time)));
+    logger << "Loaded " << total_record << " OHLC ticks in "
+           << duration_to_string(latency_end_time - latency_start_time) << Logger::endl;
     return ohlc_history;
 }
 
@@ -197,10 +199,11 @@ void print_price_history_gaps(const PriceHistory &price_history, size_t top_n) {
         get_price_history_gap(price_history.begin(), price_history.end(), 0, 0, top_n);
     for (const HistoryGap &history_gap : history_gaps) {
         const int64_t gap_duration_sec = history_gap.second - history_gap.first;
-        logInfo(string_format(history_gap.first, " ", '[', formate_time_utc(history_gap.first, "%Y-%m-%d %H:%M:%S"),
-                              "] - ", history_gap.second, " [",
-                              formate_time_utc(history_gap.second, "%Y-%m-%d %H:%M:%S"),
-                              "]: ", duration_to_string(gap_duration_sec)));
+        Logger::get_instance() << history_gap.first << " " << '['
+                               << formate_time_utc(history_gap.first, "%Y-%m-%d %H:%M:%S") << "] - "
+                               << history_gap.second << " ["
+                               << formate_time_utc(history_gap.second, "%Y-%m-%d %H:%M:%S")
+                               << "]: " << duration_to_string(gap_duration_sec) << Logger::endl;
     }
 }
 
@@ -213,7 +216,7 @@ void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistor
     const size_t price_history_size = std::distance(begin, end);
     std::map<size_t, bool> index_to_outlier = get_outlier_indexes_with_context(
         outlier_indexes, price_history_size, left_context_size, right_context_size, last_n);
-
+    Logger &logger = Logger::get_instance();
     size_t index_prev = 0;
     for (const auto &index_outlier_pair : index_to_outlier) {
         const size_t index = index_outlier_pair.first;
@@ -221,12 +224,12 @@ void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistor
         assert(index < price_history_size);
         const PriceRecord &price_record = *(begin + index);
         if (index_prev > 0 && index > index_prev + 1) {
-            logInfo("   ...");
+            logger << "   ..." << Logger::endl;
         }
 
-        logInfo(string_format((is_outlier ? " x" : "  "), ' ', price_record.timestamp_sec, " [",
-                              formate_time_utc(price_record.timestamp_sec, "%Y-%m-%d %H:%M:%S"),
-                              "]: ", price_record.price, " [", price_record.volume, ']'));
+        logger << (is_outlier ? " x" : "  ") << ' ' << price_record.timestamp_sec << " ["
+               << formate_time_utc(price_record.timestamp_sec, "%Y-%m-%d %H:%M:%S") << "]: " << price_record.price
+               << " [" << price_record.volume << ']' << Logger::endl;
         index_prev = index;
     }
 }
@@ -236,17 +239,17 @@ void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistor
 OhlcHistory convert_price_history_to_ohlc_history(const PriceHistory &price_history,
                                                   const int interval_rate_sec = INTERVAL_RATE_SEC) {
     std::vector<size_t> outlier_indexes;
-
+    Logger &logger = Logger::get_instance();
     const PriceHistory price_history_clean =
         clean_outliers(price_history.begin(), price_history.end(), MAX_PRICE_DEVIATION_PER_MIN, &outlier_indexes);
 
-    logInfo(string_format("Removed ", outlier_indexes.size(), " outliers"));
-    logInfo(string_format("Last ", LAST_N_OUTLIERS, " outliers:"));
+    logger << "Removed " << outlier_indexes.size() << " outliers" << Logger::endl;
+    logger << "Last " << LAST_N_OUTLIERS << " outliers:" << Logger::endl;
     print_outliers_with_context(price_history.begin(), price_history.end(), outlier_indexes, 5, 5, LAST_N_OUTLIERS);
     const OhlcHistory ohlc_history =
         update_data_frequency(price_history_clean.begin(), price_history_clean.end(), interval_rate_sec);
-    logInfo(string_format("Updated Frequency of ", price_history_clean.size(), " records to ", ohlc_history.size(),
-                          " OHLC ticks"));
+    logger << "Updated Frequency of " << price_history_clean.size() << " records to " << ohlc_history.size()
+           << " OHLC ticks" << Logger::endl;
     return ohlc_history;
 }
 
@@ -347,7 +350,9 @@ int main(int argc, char *argv[]) {
     // Ignore side history for now
 
     if (!price_history.empty()) {
-        logInfo(string_format("Top ", top_n_gaps, " gaps:"));
+        logger << "Top"
+               << " " << top_n_gaps << " "
+               << "gaps:" << Logger::endl;
         print_price_history_gaps(price_history, top_n_gaps);
     }
 

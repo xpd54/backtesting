@@ -48,8 +48,14 @@ std::vector<T> read_from_binary_file(const std::string &binary_file_name, std::t
                                      std::time_t end_time) {
     std::vector<T> history = read_history_from_binary_file<T>(binary_file_name, start_time, end_time, nullptr);
     const std::vector<T> history_subset_with_time = history_subset_copy(history, start_time, end_time);
-    logInfo(string_format("Selected ", history_subset_with_time.size(), " records within the time period: [",
-                          formate_time_utc(start_time), " - ", formate_time_utc(end_time), ')'));
+    Logger::get_instance()(Logger::Severity::INFO) << "Selected " << // nowrap
+        history_subset_with_time.size() <<                           // nowrap
+        " records within the time period: [" <<                      // nowrap
+        formate_time_utc(start_time) <<                              // nowrap
+        " - " <<                                                     // nowrap
+        formate_time_utc(end_time) <<                                // nowrap
+        ')' <<                                                       // nowrap
+        Logger::endl;
     return history_subset_with_time;
 }
 
@@ -72,16 +78,18 @@ void print_combination_of_trade_evaluation_results(const std::vector<SimulatorEv
 }
 
 void print_trade_simulator_evaluation_result(const SimulatorEvaluationResult &sim_evaluation_result) {
-    logInfo(string_format(
-        "--------------- Time Period ---------------  Strategy gain | Base gain(HODL) | Score | volatility"));
+    Logger &logger = Logger::get_instance();
+    logger(Logger::Severity::INFO)
+        << "--------------- Time Period ---------------  Strategy gain | Base gain(HODL) | Score | volatility"
+        << Logger::endl;
     for (const SimulatorEvaluationResult::TimePeriod &period : sim_evaluation_result.periods) {
-        logInfo(string_format('[', formate_time_utc(period.start_timestamp_sec), " - ", // nowrap
-                              formate_time_utc(period.end_timestamp_sec), "):  ",       // nowrap
-                              ((period.final_gain - 1.00f) * 100.0f), "%  | ",          // nowrap
-                              (period.base_final_gain - 1.00f) * 100.0f, "%  | ",       // nowrap
-                              (period.final_gain / period.base_final_gain), "  | ",     // nowrap
-                              period.result.simulator_volatility, "  | ",               // nowrap
-                              period.result.base_volatility));
+        logger(Logger::Severity::INFO) << '[' << formate_time_utc(period.start_timestamp_sec) << " - " << // nowrap
+            formate_time_utc(period.end_timestamp_sec) << "):  " <<                                       // nowrap
+            ((period.final_gain - 1.00f) * 100.0f) << "%  | " <<                                          // nowrap
+            (period.base_final_gain - 1.00f) * 100.0f << "%  | " <<                                       // nowrap
+            (period.final_gain / period.base_final_gain) << "  | " <<                                     // nowrap
+            period.result.simulator_volatility << "  | " <<                                               // nowrap
+            period.result.base_volatility << Logger::endl;
     }
 }
 } // namespace back_trader
@@ -90,16 +98,14 @@ using namespace back_trader;
 int main(int argc, char *argv[]) {
     /*Initialize logger*/
     Logger &logger = Logger::get_instance();
-    logger.init("log_file.log", Logger::Severity::DEBUG, Logger::OutputMode::CONSOLE);
+    logger.init("log_file.log", Logger::Severity::DEBUG, Logger::OutputMode::UBIQUITOUS);
     logger.open();
-
     /* ----------------- Validate command line argument ------------------*/
     std::unordered_map<std::string, std::string> arg_map = get_command_line_argument(argc, argv);
     for (auto &val : arg_map) {
         if (!arg_valid(val.first)) {
-            logger(Logger::Severity::ERROR);
-            logger << val.first << " "
-                   << "argument is not valid" << Logger::endl;
+            logger(Logger::Severity::ERROR) << val.first << " "
+                                            << "argument is not valid" << Logger::endl;
             std::exit(EXIT_FAILURE);
         }
     }
@@ -145,7 +151,7 @@ int main(int argc, char *argv[]) {
 
     if (evaluate_combination) {
         sim_evaluation_config.fast_execute = true;
-        logInfo("Evaluation Combination of simulators");
+        logger(Logger::Severity::INFO) << "Evaluation Combination of simulators" << Logger::endl;
         std::vector<std::unique_ptr<SimulatorDispatcher>> sim_dispatchers =
             get_combination_of_simulators(strategy_name);
 
@@ -166,6 +172,7 @@ int main(int argc, char *argv[]) {
         sim_evaluation_config.fast_execute = false;
         std::unique_ptr<SimulatorDispatcher> sim_dispather = get_trade_simulator(strategy_name);
         logInfo(string_format(sim_dispather->get_names(), " evaluation"));
+        logger(Logger::Severity::INFO) << sim_dispather->get_names() << " evaluation" << Logger::endl;
         std::unique_ptr<std::ofstream> account_log_stream = get_log_stream(output_account_log_file);
         std::unique_ptr<std::ofstream> simulator_log_stream = get_log_stream(output_simulator_log_file);
         SimulationLogger logger(account_log_stream.get(), simulator_log_stream.get());
@@ -180,5 +187,6 @@ int main(int argc, char *argv[]) {
 
     // Take end time stamp for latency check
     std::time_t latency_end = std::time(nullptr);
-    logInfo(string_format("Evaluated in ", duration_to_string(latency_end - latency_start), "sec"));
+    logger(Logger::Severity::INFO) << "Evaluated in " << duration_to_string(latency_end - latency_start) << "sec"
+                                   << Logger::endl;
 }

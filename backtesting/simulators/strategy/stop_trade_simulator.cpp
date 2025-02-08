@@ -16,7 +16,7 @@ void StopTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vector<flo
     const int64_t timestamp_sec = ohlc_tick.timestamp_sec;
     const float price = ohlc_tick.close;
     // ohlc is coming as time moving forward
-    assert(timestamp_sec > _last_time_sec);
+    assert(timestamp_sec > _last_timestamp_sec);
     assert(price > 0);
     // Do not trade simulate for account balance == 0
     assert(base_balance > 0 || quote_balance > 0);
@@ -32,7 +32,7 @@ void StopTradeSimulator::update(const OhlcTick &ohlc_tick, const std::vector<flo
         }
     } else {
         // If last last executed mode was same as current ohlc just update the price
-        assert(current_mode == _sim_mode);
+        assert(current_mode == _mode);
         update_stop_order_price(current_mode, timestamp_sec, price);
     }
     _last_timestamp_sec = timestamp_sec;

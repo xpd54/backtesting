@@ -15,7 +15,7 @@ void RebalancingTradeSimulator::update(const OhlcTick &ohlc_tick,
     const int64_t timestamp_sec = ohlc_tick.timestamp_sec;
     const float price = ohlc_tick.close;
     // we are getting next ohlc
-    assert(timestamp_sec > last_timestamp_sec);
+    assert(timestamp_sec > _last_timestamp_sec);
     assert(price > 0);
     assert(base_balance > 0 || quote_balance > 0);
     // whole value of this porfolio depends on the current price of base currency

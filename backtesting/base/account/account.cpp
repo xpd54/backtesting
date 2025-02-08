@@ -319,7 +319,7 @@ bool Account::execute_order(const AccountConfig &account_config, const Order &or
                 return market_buy_at_quote(account_config.market_order_fee_config, ohlc_tick, possible_quote_amount);
             }
         } else {
-            assert(order.size == Order::Side::SELL);
+            assert(order.side == Order::Side::SELL);
             if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
                 return market_sell(account_config.market_order_fee_config, ohlc_tick, possible_base_amount);
             } else {
@@ -338,7 +338,7 @@ bool Account::execute_order(const AccountConfig &account_config, const Order &or
                                          order.price);
             }
         } else {
-            assert(order.size == Order::Side::SELL);
+            assert(order.side == Order::Side::SELL);
             if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
                 return stop_sell(account_config.stop_order_fee_config, ohlc_tick, possible_base_amount, order.price);
             } else {
@@ -358,7 +358,7 @@ bool Account::execute_order(const AccountConfig &account_config, const Order &or
                                           order.price);
             }
         } else {
-            assert(order.size == Order::Side::SELL);
+            assert(order.side == Order::Side::SELL);
             if (std::holds_alternative<Order::BaseAmount>(order.amount)) {
                 return limit_sell(account_config.limit_order_fee_config, ohlc_tick, possible_base_amount, order.price);
             } else {
