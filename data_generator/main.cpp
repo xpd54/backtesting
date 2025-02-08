@@ -19,7 +19,7 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
                                               const std::time_t end_time) {
     const std::time_t latency_start_time = std::time(nullptr);
     Logger &logger = Logger::get_instance();
-    logger << "Reading price from csv file:- " << file_name << Logger::endl;
+    logger(Logger::Severity::INFO) << "Reading price from csv file:- " << file_name << Logger::endl;
 
     // Memory map the file as string_view
     common_util::RMemoryMapped<char> read_file(file_name);
@@ -69,9 +69,9 @@ PriceHistory read_price_history_from_csv_file(const std::string &file_name, cons
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = price_history.size();
-    logger << "Loaded " << total_record << " records in "               // nowrap
-           << duration_to_string(latency_end_time - latency_start_time) // nowrap
-           << Logger::endl;
+    logger(Logger::Severity::INFO) << "Loaded " << total_record << " records in "               // nowrap
+                                   << duration_to_string(latency_end_time - latency_start_time) // nowrap
+                                   << Logger::endl;
     return price_history;
 }
 
@@ -95,7 +95,7 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
                                             const std::time_t end_time) {
     const std::time_t latency_start_time = std::time(nullptr);
     Logger &logger = Logger::get_instance();
-    logger << "Reading OHLC history from:- " << file_name << Logger::endl;
+    logger(Logger::Severity::INFO) << "Reading OHLC history from:- " << file_name << Logger::endl;
     common_util::RMemoryMapped<char> read_file(file_name);
     const char *begin = read_file.begin();
     size_t view_size = read_file.size();
@@ -172,8 +172,8 @@ OhlcHistory read_ohlc_history_from_csv_file(const std::string &file_name, const 
     }
     const std::time_t latency_end_time = std::time(nullptr);
     const size_t total_record = ohlc_history.size();
-    logger << "Loaded " << total_record << " OHLC ticks in "
-           << duration_to_string(latency_end_time - latency_start_time) << Logger::endl;
+    logger(Logger::Severity::INFO) << "Loaded " << total_record << " OHLC ticks in "
+                                   << duration_to_string(latency_end_time - latency_start_time) << Logger::endl;
     return ohlc_history;
 }
 
@@ -199,11 +199,10 @@ void print_price_history_gaps(const PriceHistory &price_history, size_t top_n) {
         get_price_history_gap(price_history.begin(), price_history.end(), 0, 0, top_n);
     for (const HistoryGap &history_gap : history_gaps) {
         const int64_t gap_duration_sec = history_gap.second - history_gap.first;
-        Logger::get_instance() << history_gap.first << " " << '['
-                               << formate_time_utc(history_gap.first, "%Y-%m-%d %H:%M:%S") << "] - "
-                               << history_gap.second << " ["
-                               << formate_time_utc(history_gap.second, "%Y-%m-%d %H:%M:%S")
-                               << "]: " << duration_to_string(gap_duration_sec) << Logger::endl;
+        Logger::get_instance()(Logger::Severity::INFO)
+            << history_gap.first << " " << '[' << formate_time_utc(history_gap.first, "%Y-%m-%d %H:%M:%S") << "] - "
+            << history_gap.second << " [" << formate_time_utc(history_gap.second, "%Y-%m-%d %H:%M:%S")
+            << "]: " << duration_to_string(gap_duration_sec) << Logger::endl;
     }
 }
 
@@ -224,12 +223,13 @@ void print_outliers_with_context(PriceHistory::const_iterator begin, PriceHistor
         assert(index < price_history_size);
         const PriceRecord &price_record = *(begin + index);
         if (index_prev > 0 && index > index_prev + 1) {
-            logger << "   ..." << Logger::endl;
+            logger(Logger::Severity::INFO) << "   ..." << Logger::endl;
         }
 
-        logger << (is_outlier ? " x" : "  ") << ' ' << price_record.timestamp_sec << " ["
-               << formate_time_utc(price_record.timestamp_sec, "%Y-%m-%d %H:%M:%S") << "]: " << price_record.price
-               << " [" << price_record.volume << ']' << Logger::endl;
+        logger(Logger::Severity::INFO) << (is_outlier ? " x" : "  ") << ' ' << price_record.timestamp_sec << " ["
+                                       << formate_time_utc(price_record.timestamp_sec, "%Y-%m-%d %H:%M:%S")
+                                       << "]: " << price_record.price << " [" << price_record.volume << ']'
+                                       << Logger::endl;
         index_prev = index;
     }
 }
@@ -243,13 +243,13 @@ OhlcHistory convert_price_history_to_ohlc_history(const PriceHistory &price_hist
     const PriceHistory price_history_clean =
         clean_outliers(price_history.begin(), price_history.end(), MAX_PRICE_DEVIATION_PER_MIN, &outlier_indexes);
 
-    logger << "Removed " << outlier_indexes.size() << " outliers" << Logger::endl;
-    logger << "Last " << LAST_N_OUTLIERS << " outliers:" << Logger::endl;
+    logger(Logger::Severity::INFO) << "Removed " << outlier_indexes.size() << " outliers" << Logger::endl;
+    logger(Logger::Severity::INFO) << "Last " << LAST_N_OUTLIERS << " outliers:" << Logger::endl;
     print_outliers_with_context(price_history.begin(), price_history.end(), outlier_indexes, 5, 5, LAST_N_OUTLIERS);
     const OhlcHistory ohlc_history =
         update_data_frequency(price_history_clean.begin(), price_history_clean.end(), interval_rate_sec);
-    logger << "Updated Frequency of " << price_history_clean.size() << " records to " << ohlc_history.size()
-           << " OHLC ticks" << Logger::endl;
+    logger(Logger::Severity::INFO) << "Updated Frequency of " << price_history_clean.size() << " records to "
+                                   << ohlc_history.size() << " OHLC ticks" << Logger::endl;
     return ohlc_history;
 }
 
@@ -258,7 +258,7 @@ OhlcHistory convert_price_history_to_ohlc_history(const PriceHistory &price_hist
 int main(int argc, char *argv[]) {
     /*Initialize logger*/
     Logger &logger = Logger::get_instance();
-    logger.init("log_file.log", Logger::Severity::INFO, Logger::OutputMode::CONSOLE);
+    logger.init("log_file.log", Logger::Severity::DEBUG, Logger::OutputMode::CONSOLE);
     logger.open();
     /*validate arguments*/
     // TODO :- use std::varient to hold argument value or default error code.
@@ -293,9 +293,9 @@ int main(int argc, char *argv[]) {
         (arg_map["start_time"] == "" ? convert_time_string(START_TIME) : convert_time_string(arg_map["start_time"]));
     std::time_t end_time =
         arg_map["end_time"] == "" ? convert_time_string(END_TIME) : convert_time_string(arg_map["end_time"]);
-    logger << "Selected time period:- "
-           << "[" << formate_time_utc(start_time, "%Y-%m-%d %H:%M:%S") << "] - ["
-           << formate_time_utc(end_time, "%Y-%m-%d %H:%M:%S") << ")" << Logger::endl;
+    logger(Logger::Severity::INFO) << "Selected time period:- "
+                                   << "[" << formate_time_utc(start_time, "%Y-%m-%d %H:%M:%S") << "] - ["
+                                   << formate_time_utc(end_time, "%Y-%m-%d %H:%M:%S") << ")" << Logger::endl;
 
     // Error :- Getting two input at same time
     if (!input_price_history_csv_file.empty() && !input_price_history_binary_file.empty()) {
@@ -350,9 +350,9 @@ int main(int argc, char *argv[]) {
     // Ignore side history for now
 
     if (!price_history.empty()) {
-        logger << "Top"
-               << " " << top_n_gaps << " "
-               << "gaps:" << Logger::endl;
+        logger(Logger::Severity::INFO) << "Top"
+                                       << " " << top_n_gaps << " "
+                                       << "gaps:" << Logger::endl;
         print_price_history_gaps(price_history, top_n_gaps);
     }
 
