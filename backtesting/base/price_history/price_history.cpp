@@ -1,6 +1,7 @@
 #include "price_history.hpp"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <queue>

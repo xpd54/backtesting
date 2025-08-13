@@ -125,16 +125,16 @@ constexpr std::array<const char *, static_cast<std::size_t>(Order::Type::Count)>
 }
 
 constexpr const char *order_side_to_string(Order::Side side) {
-    if (static_cast<size_t>(side) < static_cast<size_t>(Order::Side::Count)) {
-        return get_side_strings()[static_cast<size_t>(side)];
+    if (static_cast<std::size_t>(side) < static_cast<std::size_t>(Order::Side::Count)) {
+        return get_side_strings()[static_cast<std::size_t>(side)];
     } else {
         return "NONE";
     }
 }
 
 constexpr const char *order_type_to_string(Order::Type type) {
-    if (static_cast<size_t>(type) < static_cast<size_t>(Order::Type::Count)) {
-        return get_type_strings()[static_cast<size_t>(type)];
+    if (static_cast<std::size_t>(type) < static_cast<std::size_t>(Order::Type::Count)) {
+        return get_type_strings()[static_cast<std::size_t>(type)];
     } else {
         return "NONE";
     }
