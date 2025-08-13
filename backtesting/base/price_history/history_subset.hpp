@@ -1,5 +1,6 @@
 #pragma once
 #include "common_interface/common.hpp"
+#include <algorithm>
 #include <cstdint>
 #include <utility>
 #include <vector>

@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 // OHLC and Account
 struct EvaluationResult {
